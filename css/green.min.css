@@ -24,7 +24,8 @@ button,
 .ui-btn {
 	font-size: 1em;
 	line-height: 1.3;
-	 font-family: calibri /*{global-font-family}*/;
+	 font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", 
+	 Helvetica, Arial, "Lucida Grande", sans-serif; /*{global-font-family}*/;
 }
 legend,
 .ui-input-text input,
