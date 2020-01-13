@@ -1,3 +1,1098 @@
+<<<<<<< HEAD
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<link rel="stylesheet" href="css/jquery.mobile.icons.min.css" />
+	<link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
+	<link rel="stylesheet" href="css/green.min.css" />
+	<script src="js/jquery-1.11.1.min.js"></script>
+	<script type="text/javascript">
+		$(document).on('mobileinit', function () {
+			$.mobile.defaultPageTransition = 'slidefade';
+		});
+	</script>
+	<script src="js/jquery.mobile-1.4.5.min.js"></script>
+	<style>
+		.dashboard {
+			text-align: right;
+		}
+		.maxw-200 {
+			max-width: 200px;
+			margin: 0 auto;
+		}
+		.ui-content {
+			max-width: 90vw;
+			margin: 0 auto;
+		}
+	</style>
+</head>
+
+<body>
+
+	<!-- Start of first page -->
+	<div data-role="page" id="login">
+
+		<div data-role="header">
+			<h1 style="margin:0">Welcome to EZ Pay!</h1>
+		</div><!-- /header -->
+
+		<div role="main" class="ui-content maxw-200" style="text-align: center;">
+			<div class="pt-4 pb-5">
+			<img src="css/images/client.png" height="40px">
+		</div>
+			<form>
+			<input type="text" name="username" id="Username" placeholder="Username" />
+			<input type="password" name="password" id="Password" placeholder="Password" />
+			<a href="#" class="ui-btn" onclick="Validate()">Login</a>
+			<p class="error"></p>
+			</form>
+		</div><!-- /content -->
+
+		<div data-role="footer" data-position="fixed">
+			<h4>Page Footer</h4>
+		</div><!-- /footer -->
+		<script>
+			var err = false;
+
+			function Validate() {
+				if (document.getElementById('Username').value == '' || document.getElementById('Username').value == undefined) {
+					$('.error').text('Username is empty');
+					return;
+				}
+				if (document.getElementById('Password').value == '' || document.getElementById('Password').value == undefined) {
+					$('.error').text('Password is empty');
+					return;
+				}
+				var settings = {
+					"url": "https://development.nelnet.io/authapi/authenticate",
+					"method": "POST",
+					"timeout": 0,
+					"headers": {
+						"userpoolid": "us-west-2_gHcsU9ZkF",
+						"appclientid": "2rdrks757sr1ii3hrvp243nqj0",
+						"Content-Type": "application/json"
+					},
+					"data": JSON.stringify({ "userName": document.getElementById('Username').value, "password": document.getElementById('Password').value })
+				};
+
+				$.ajax(settings).done(function (response) {
+					err = false;
+					$('.error').text('');
+					console.log(response);
+					sessionStorage.setItem("token", "Bearer " + response.data.accessToken);
+					GetBorrowerData();
+					window.location = "#menu";
+					$('.calc-field').hide(); //css('display','none');
+					$('.loading').show(); //css('display', 'block')
+				}).fail(function(jqXHR, exception){
+					err = true;
+					var msg = '';
+						if (jqXHR.status === 0) {
+							msg = 'Not connected. Verify Network.';
+						} else if (jqXHR.status == 404) { 
+							msg = "Requested page not found. [404]";
+						} else if (jqXHR.status == 500) {
+							msg = "Internal Service Error [500}.";
+						} else if (jqXHR.status == 401) {
+							msg = "Incorrect credentials.";
+						} else if (exception === 'parsererror') {
+							msg = "Requested JSON parse failed";
+						} else if (exception === 'timeout') {
+							msg = "Time out error.";
+						} else if (exception === 'abort') {
+							msg = "Ajax request aborted.";
+						} else {
+							msg = "uncaught error. \n" + jqXHR.responseText;
+						}
+						$('.error').html(msg);
+					
+						return false;
+				});
+			}
+
+			function GetBorrowerData() {
+				var settings = {
+					"url": "https://development.nelnet.io/borrowerapi/borrowers",
+					"method": "GET",
+					"timeout": 0,
+					"headers": {
+						"Authorization": sessionStorage.getItem('token'),
+						"Content-Type": "application/json"
+					},
+				};
+
+				$.ajax(settings).done(function (response) {
+					console.log('Borrower')
+					console.log(response);
+					$('.error').text('Borrower API Complete');
+					$('#greeting').text("Hello, " + response.data[0].firstName);
+					sessionStorage.setItem("borrowerData", JSON.stringify(response.data))
+				});
+				GetLoanData();
+			}
+
+			function GetLoanData() {
+				var settings = {
+					"url": "https://development.nelnet.io/loanapi/loans",
+					"method": "GET",
+					"timeout": 0,
+					"headers": {
+						"Authorization": sessionStorage.getItem("token"),
+						"Content-Type": "application/json",
+						"tenantid": "314",
+						"clientid": "2"
+					},
+				};
+
+				$.ajax(settings).done(function (response) {
+					console.log('loanData');
+					console.log(response);
+					$('.error').text('Loan API Complete');
+					sessionStorage.setItem("loanData", JSON.stringify(response.data));
+					GetLoanDetails(response.data);
+					GetLoanBalances(response.data);
+					GetPaymentDues(response.data);
+					GetLoanPrograms(response.data);
+					GetLenders(response.data);
+					GetMaturityDetails(response.data);
+					GetPayoffDetails(response.data);
+					GetPaymentSchedules(response.data);
+					GetLastPayment(response.data);
+					GetPaymentHistory(response.data);
+				});
+			}
+
+            function GetPaymentHistory(loans) {
+                var paymentHistory = [];
+                
+                loans.forEach(function (loan) {
+                    
+					var settings = {
+						"url": "https://development.nelnet.io/transactionapi/payments?loanid=" + loan.loanId + "&includereversals=true&offset=0&limit=100",
+						"method": "GET",
+						"timeout": 0,
+						"headers": {
+							"Authorization": sessionStorage.getItem("token"),
+							"Content-Type": "application/x-www-form-urlencoded"
+						},
+						"data": "<file contents here>"
+					};
+
+					$.ajax(settings).done(function (response) {
+						console.log('paymentHistory')
+						console.log(response);
+						$('.error').text('Payment History API Complete');
+
+						paymentHistory.push(response.data);
+						sessionStorage.setItem("paymentHistory", JSON.stringify(paymentHistory));
+					});
+                });
+            }
+			function GetLastPayment(loans) {
+
+				var lastPayments = [];
+
+				loans.forEach(function (loan) {
+
+					var settings = {
+						"url": "https://development.nelnet.io/transactionapi/payments?loanid=" + loan.loanId + "&includereversals=false&offset=0&limit=1",
+						"method": "GET",
+						"timeout": 0,
+						"headers": {
+							"Authorization": sessionStorage.getItem("token"),
+							"Content-Type": "application/x-www-form-urlencoded"
+						},
+						"data": "<file contents here>"
+					};
+
+					$.ajax(settings).done(function (response) {
+						console.log('lastPayments')
+						console.log(response);
+						$('.error').text('Last Payment API Complete');
+
+						lastPayments.push(response.data);
+						sessionStorage.setItem("lastPayments", JSON.stringify(lastPayments));
+					});
+				});
+			}
+
+			function GetPaymentSchedules(loans) {
+
+				var paymentSchedules = [];
+
+				loans.forEach(function (loan){
+					var settings = {
+						"url": "https://development.nelnet.io/loanapi/paymentschedules?loanid=" + loan.loanId + "&offset=0&limit=1",
+						"method": "GET",
+						"timeout": 0,
+						"headers": {
+							"Authorization": sessionStorage.getItem('token'),
+							"Content-Type": "application/x-www-form-urlencoded"
+						},
+						"data": "<file contents here>"
+					};
+
+					$.ajax(settings).done(function (response) {
+						console.log('paymentSchedules');
+						console.log(response);
+						$('.error').text('Payment Schedules API Complete');
+
+						paymentSchedules.push(response.data);
+						sessionStorage.setItem("paymentSchedules", JSON.stringify(paymentSchedules));
+					});
+				});			
+			}
+
+			function GetPayoffDetails(loans) {
+				var loanPayoffs = [];
+
+				loans.forEach(function (loan){
+					var settings = {
+						"url": "https://development.nelnet.io/loanaccountingapi/payoff/" + loan.loanId,
+						"method": "GET",
+						"timeout": 0,
+						"headers": {
+							"Authorization": sessionStorage.getItem('token'),
+							"Content-Type": "application/x-www-form-urlencoded"
+						},
+						"data": "<file contents here>"
+					};
+
+					$.ajax(settings).done(function (response) {
+						console.log('loanPayoff');
+						console.log(response);
+						$('.error').text('Payoff API Complete');
+
+						loanPayoffs.push(response.data);
+						sessionStorage.setItem("loanPayoffs", JSON.stringify(loanPayoffs));
+					});
+				})
+			}
+
+			function GetMaturityDetails(loans) {
+				var maturityDetails = [];
+
+				loans.forEach(function (loan){
+					var settings = {
+						"url": "https://development.nelnet.io/loanapi/maturitydetails?loanid=" + loan.loanId,
+						"method": "GET",
+						"timeout": 0,
+						"headers": {
+							"Authorization": sessionStorage.getItem('token'),
+							"Content-Type": "application/x-www-form-urlencoded"							
+						},
+						"data": "<file contents here>"
+					};
+					
+					$.ajax(settings).done(function(response){
+						console.log('maturityDetails');
+						console.log(response);
+						$('.error').text('Maturity Details API Complete');
+
+						maturityDetails.push(response.data);
+						sessionStorage.setItem("maturityDetails", JSON.stringify(maturityDetails));
+					});
+				});
+			}
+		
+
+			function GetLoanDetails(loans) {
+				var loanDetails = [];
+
+				loans.forEach(function (loan){
+					var settings = {
+						"url": "https://development.nelnet.io/loanaccountingapi/loandetails?loanid=" + loan.loanId,
+						"method": "GET",
+						"timeout": 0,
+						"headers": {
+							"Authorization": sessionStorage.getItem('token'),
+							"Content-Type": "application/x-www-form-urlencoded"
+						},
+						"data": "<file contents here>"
+					};
+
+					$.ajax(settings).done(function (response) {
+						console.log('loanDetails');
+						console.log(response);
+						$('.error').text('Loan Details API Complete');
+
+						loanDetails.push(response.data);
+						sessionStorage.setItem("loanDetails", JSON.stringify(loanDetails));
+					});
+				})
+			}
+
+			function GetLoanPrograms(loans) {
+				var loanPrograms = [];
+				//$('#loanDetails')
+
+				loans.forEach(function (loan) {
+					var settings = {
+						"url": "https://development.nelnet.io/loanapi/loanprograms/" + loan.loanProgramId,
+						"method": "GET",
+						"timeout": 0,
+						"headers": {
+							"Authorization": sessionStorage.getItem('token'),
+							"Content-Type": "application/json"
+						},
+						};
+
+						$.ajax(settings).done(function (response) {
+							console.log('loanPrograms');
+							console.log(response);
+							$('.error').text('Loan Programs API Complete');
+
+							loanPrograms.push(response.data);
+							sessionStorage.setItem("loanPrograms", JSON.stringify(loanPrograms));
+						});
+				});
+			}
+
+			function GetLenders(loans) {
+				var lenders = [];
+				//$('#loanDetails')
+
+				loans.forEach(function (loan) {
+					var settings = {
+						"url": "https://development.nelnet.io/lenderapi/lenders/" + loan.lenderId,
+						"method": "GET",
+						"timeout": 0,
+						"headers": {
+							"Authorization": sessionStorage.getItem('token'),
+							"Content-Type": "application/json"
+						},
+						};
+
+						$.ajax(settings).done(function (response) {
+							console.log('lenders');
+							console.log(response);
+							$('.error').text('Lenders API Complete');
+
+							lenders.push(response.data);
+							sessionStorage.setItem("lenders", JSON.stringify(lenders));
+						});
+				});
+			}
+
+			function GetLoanBalances(loans) {
+				var loanBalances = [];
+				$('#dashboard-totalBal').text(0);
+				loans.forEach(function (loan) {
+					var settings = {
+						"url": "https://development.nelnet.io/loanaccountingapi/loanbalances?loanid=" + loan.loanId,
+						"method": "GET",
+						"timeout": 0,
+						"headers": {
+							"Authorization": sessionStorage.getItem('token'),
+							"Content-Type": "application/x-www-form-urlencoded"
+						},
+						"data": "<file contents here>"
+					};
+
+					$.ajax(settings).done(function (response) {
+						console.log('loanBalances');
+						console.log(response);
+						$('.error').text('Loan Balances API Complete');
+
+						loanBalances.push(response.data);
+						sessionStorage.setItem("loanBalances", JSON.stringify(loanBalances));
+					});
+				});
+			}
+
+			function GetPaymentDues(loans) {
+
+				var paymentDues = [];
+				loans.forEach(function (loan) {
+					var settings = {
+						"url": "https://development.nelnet.io/loanaccountingapi/paymentdue?loanid=" + loan.loanId,
+						"method": "GET",
+						"timeout": 0,
+						"headers": {
+							"Authorization": sessionStorage.getItem('token'),
+							"Content-Type": "application/x-www-form-urlencoded"
+						},
+						"data": "<file contents here>"
+					};
+
+					$.ajax(settings).done(function (response) {
+						console.log('paymentDues');
+						console.log(response);
+						$('.error').text('Payment Due API Complete');
+
+						paymentDues.push(response.data);
+						sessionStorage.setItem("paymentDues", JSON.stringify(paymentDues));
+					});
+				});
+			}
+
+			$(document).ajaxStop(function () {
+				if (err){
+					return false;
+				}
+
+				LoadLoanDropDown();
+				LoadDataToScreen(0);				
+			});
+
+			function LoadLoanDropDown() {
+				var items = '';
+				var i = 0;
+				y = JSON.parse(sessionStorage.getItem('loanData'));
+				y.forEach(function(loan) {
+					items += "<option value='"+i+ "'" + ( i == 0 ? ' selected ' : '') + ">"+loan.loanNumberFormatted+"</option>";
+					i++;
+				})
+				$("#currentLoan").html(items);
+				$("#currentLoan").trigger("change");
+			}
+			function LoadDataToScreen(currLoan) {
+				
+				// loan balances loop
+				if (currLoan !== 0) {
+					currLoan = parseInt(currLoan);
+				}
+				var y = JSON.parse(sessionStorage.getItem('loanBalances'));
+				var x = 0; //parseFloat($('#dashboard-totalBal').text());
+				var lPD = '0001-01-01';
+				var nDD = '0001-01-01';
+				var pTD = '0001-01-01';
+				var cAD = 0;
+				var fAD = 0;
+				var pAD = 0;
+				var tAD = 0;
+				$('#lD-oPB').text(ConvertToCurrency(y[currLoan].totalPrincipalAmount));
+				$('#lD-totalInterestPaid').text(ConvertToCurrency(y[currLoan].totalInterestPaid));
+				$('#lD-outstandingInterest').text(ConvertToCurrency(y[currLoan].totalInterestAmount));
+				$('#lD-servicerFees').text(ConvertToCurrency(y[currLoan].totalServicerFeeAmount));
+				$('#lD-lenderFees').text(ConvertToCurrency(y[currLoan].totalLenderFeeAmount));
+				$('#lD-dailyInterest').text(ConvertToCurrency(y[currLoan].perDiem.amount));
+				y.forEach(function (bal) {
+					x += bal.feeBalance + bal.interestBalance + bal.principalBalance;
+					if (lPD < bal.lastPaymentDate) {
+						lPD = bal.lastPaymentDate;
+					}					
+				});
+
+				$('#dashboard-lastPaymentDate').text(ConvertDate(lPD));
+				$('#dashboard-totalBal').text(ConvertToCurrency(x));
+
+
+				// payment dues loop
+				y = JSON.parse(sessionStorage.getItem('paymentDues'));
+
+
+				y.forEach(function (pD) {
+					if (nDD < pD.nextDueDate) {
+						nDD = pD.nextDueDate;
+					}
+					if (pTD < pD.paidToDate) {
+						pTD = pD.paidToDate;
+					}
+					cAD += ConvertToCurrency(pD.currentAmountDue);
+					fAD += ConvertToCurrency(pD.feeAmountDue);
+					pAD += ConvertToCurrency(pD.pastAmountDue);
+					tAD += ConvertToCurrency(pD.totalAmountDue);
+				});
+
+				$('#dashboard-nextDueDate').text(ConvertDate(nDD));
+				$('#dashboard-paidToDate').text(ConvertDate(pTD));
+				$('#dashboard-currentAmtDue').text(ConvertToCurrency(cAD));
+				$('#dashboard-pastAmtDue').text(ConvertToCurrency(pAD));
+				$('#dashboard-feeAmtDue').text(ConvertToCurrency(fAD));
+				$('#dashboard-totalAmtDue').text(ConvertToCurrency(tAD));
+				$('#pmt-tAD').text(ConvertToCurrency(tAD));
+				$('#lD-daysPastDue').text(y[currLoan].daysLate)
+
+                // payment history loop
+                y = JSON.parse(sessionStorage.getItem('paymentHistory'))[currLoan];
+				var pH = "<thead><tr>" +
+				    "<th>Type</th><th >Date</th><th >Amount</th>" +
+				    "<th >Principal Paid</th><th  >Interest Paid</th>" +
+				    "<th >Fees Paid</th>" +
+				    "</tr></thead><tbody>";
+				    
+				y.forEach(function (transaction) {
+				    pH += "<tr><td>" + transaction.transactionType + "</td>" +
+				          "<td >" + ConvertDate(transaction.transactionDate) + "</td>" +
+				          "<td >" + ConvertToCurrency(transaction.transactionAmount) + "</td>" +
+				          "<td >" + ConvertToCurrency(transaction.principalPaid) + "</td>" +
+				          "<td >" + ConvertToCurrency(transaction.interestPaid) + "</td>" + 
+				          "<td >" + ConvertToCurrency(transaction.feePaid) + "</td></tr>"
+				});
+				pH += "</tbody>";
+				
+				$('#paymentHistory').html(pH);
+				// loans loop
+
+				y = JSON.parse(sessionStorage.getItem('loanData'))[currLoan];
+				$('#lD-loanStatus').text(y.status);
+				$('#lD-fDD').text(ConvertDate(y.disbursementDate));
+				$('#lD-oLA').text(ConvertToCurrency(y.amount));
+				$('#lD-oTerm').text(y.term);
+				$('#lD-interestRate').text(y.interestRate);
+				$('#lD-interestRateType').text(y.rateType);
+				$('#lD-militaryBenefit').text(y.isScraActive ? 'Yes' : 'No');
+				$('#lD-loanGUID').text(y.loanId);
+				$('#lD-externalReferenceID').text(y.externalReferenceId);
+				
+				// payment schedules loop
+
+				y = JSON.parse(sessionStorage.getItem('paymentSchedules'))[currLoan][0];
+				$('#lD-APR').text(y.apr);
+
+				// loan details loop
+				y = JSON.parse(sessionStorage.getItem('loanDetails'))[currLoan];
+				$('#lD-rTerm').text(y.remainingTerm);
+				$('#lD-regularPaymentAmount').text(ConvertToCurrency(y.regularPaymentAmount));
+				$('#lD-nextDueDate').text(ConvertDate(y.nextDueDate));
+				$('#lD-pastDueAmount').text(ConvertToCurrency(y.pastAmountDue));
+				$('#lD-currentAmountDue').text(ConvertToCurrency(y.currentAmountDue));
+
+				// loan programs loop
+				y = JSON.parse(sessionStorage.getItem('loanPrograms'))[currLoan];
+				$('#lD-loanProgram').text(y.description);
+				y = JSON.parse(sessionStorage.getItem('lenders'))[currLoan];
+				$('#lD-lenderName').text(y.name);
+
+				// loan payoff loop
+				y = JSON.parse(sessionStorage.getItem('loanPayoffs'))[currLoan];
+				$('#lD-currentPayoffAmount').text(ConvertToCurrency(y.payoffAmount));
+
+				// last payments loop
+				y = JSON.parse(sessionStorage.getItem('lastPayments'))[currLoan][0];
+				$('#lD-lastPaymentAmount').text(ConvertToCurrency(y.transactionAmount));
+				$('#lD-lastPaymentDate').text(ConvertDate(y.transactionDate));
+				// maturity loop
+				y = JSON.parse(sessionStorage.getItem('maturityDetails'))[currLoan];
+				$('#lD-mDate').text(ConvertDate(y.maturityDate));
+
+				y = JSON.parse(sessionStorage.getItem('borrowerData'))[0];
+				$('#greeting').text("Hello, " + y.firstName);
+				$('#lD-LoanHeader').text('Loan: ' + $('#currentLoan').children('option:selected').text());
+				$('.calc-field').css('display', 'block');
+				$('.loading').css('display', 'none');
+				$('.error').text('');
+				// place code to be executed on completion of last outstanding ajax call here
+			};
+
+            function ConvertToCurrency(value){
+                value = parseFloat(value).toFixed(2)
+                return '$' + value;
+            }
+            
+			function ConvertDate(dT) {
+				var d = new Date(dT);
+				return d.getMonth() + 1 + '/' + d.getDate() + '/' + d.getFullYear();
+			}
+
+			$(document).ready(function(){
+				//var currLoan = $('#currentLoan').children("option:selected").val();
+				LoadLoanDropDown();
+				LoadDataToScreen(0);
+			})
+	// $( document ).delegate("#menu", "onload", function() {
+  	// 	alert('A page with an ID of "menu" was just created by jQuery Mobile!');
+	// });
+		</script>
+	</div><!-- /page -->
+
+
+
+	<!-- Dashboard -->
+	<div data-role="page" id="menu">
+
+		<div data-role="header">
+			<!-- <a href="#login" class="ui-btn ui-corner-all ui-icon-arrow-l ui-btn-icon-notext"
+				data-direction="reverse"></a> -->
+			<h1 id="greeting"></h1>
+			<a href="#menupanel" class="ui-btn ui-btn-right">...</a>
+		</div><!-- /header -->
+
+		<div data-role="panel" id="menupanel" data-position="right" style="margin-top:30px">
+			<!-- <a class="ui-btn maxw-200" href="#menu">Dashboard</a> -->
+			<a class="ui-btn maxw-200" href="#payment">Make a Payment</a>
+			<a class="ui-btn maxw-200" href="#loanDetails">Loan Details</a>
+			<a class="ui-btn maxw-200" href="#payHistory">Payment History</a>
+			<a class="ui-btn maxw-200" href="#upload">Uploads</a>
+			<a href="#login" onclick="Logoff()" class="ui-btn maxw-200 ui-icon-arrow-l ui-btn-icon-left"
+				data-direction="reverse">Logoff</a>
+		</div><!-- /content -->
+
+		<div data-role="main" class="ui-content">
+			<div class="pb-4">
+				<h2>Loan</h2>
+				<select name="currentLoan" id="currentLoan" onchange="LoadDataToScreen(this.value)"></select>
+			</div>
+			<h2>Dashboard</h2>
+			<table class="table table-striped" style="font-size: 0.8em;">
+				<tbody>
+					<tr>
+						<th>Total Balance:</th>
+						<td>
+							<div class="spinner-grow spinner-grow-sm loading"></div>
+							<div id="dashboard-totalBal" class="dashboard calc-field"></div>
+						</td>
+					</tr>
+					<tr>
+						<th>Last Payment Date:</th>
+						<td>
+							<div class="spinner-grow spinner-grow-sm loading"></div>
+							<div id="dashboard-lastPaymentDate" class="dashboard calc-field"></div>
+						</td>
+					</tr>
+					<tr>
+						<th>Next Due Date:</th>
+						<td>
+							<div class="spinner-grow spinner-grow-sm loading"></div>
+							<div id="dashboard-nextDueDate" class="dashboard calc-field"></div>
+						</td>
+					</tr>
+					<tr>
+						<th>Paid To Date:</th>
+						<td>
+							<div class="spinner-grow spinner-grow-sm loading"></div>
+							<div id="dashboard-paidToDate" class="dashboard calc-field"></div>
+						</td>
+					</tr>
+					<tr>
+						<th>Current Amount Due:</th>
+						<td>
+							<div class="spinner-grow spinner-grow-sm loading"></div>
+							<div id="dashboard-currentAmtDue" class="dashboard calc-field"></div>
+						</td>
+					</tr>
+					<tr>
+						<th>Past Amount Due:</th>
+						<td>
+							<div class="spinner-grow spinner-grow-sm loading"></div>
+							<div id="dashboard-pastAmtDue" class="dashboard calc-field"></div>
+						</td>
+					</tr>
+					<tr>
+						<th>Fee Amount Due:</th>
+						<td>
+							<div class="spinner-grow spinner-grow-sm loading"></div>
+							<div id="dashboard-feeAmtDue" class="dashboard calc-field"></div>
+						</td>
+					</tr>
+					<tr style="font-size:1.2rem;" class="bg-secondary text-white">
+						<th>Total Amount Due:</th>
+						<td>
+							<div class="spinner-grow spinner-grow-sm loading"></div>
+							<div id="dashboard-totalAmtDue" class="dashboard calc-field"></div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<p class='error'></p>
+		</div>
+
+		<div data-role="footer" data-position="fixed">
+			<h4>Page Footer</h4>
+		</div><!-- /footer -->
+		<script>
+			function Logoff() {
+				sessionStorage.clear();
+			}
+			// $('#menu').ready(function () {
+			// 	var totBal = 0;
+			// 	var x = JSON.parse(sessionStorage.getItem('loanBalances'));
+			// 	x.forEach(function (xBal) {
+			// 		totBal += xBal.principalBalance + xBal.interestBalance + xBal.feeBalance;
+			// 	})
+			// 	$('#dashboard-totalBal').text(totBal);
+			// })
+		</script>
+	</div><!-- /page -->
+
+	<!-- Payment -->
+	<div data-role="page" id="payment">
+
+		<div data-role="header">
+			<a href="#menu" class="ui-btn ui-corner-all ui-icon-arrow-l ui-btn-icon-notext"
+				data-direction="reverse" onclick='ClearErrors()'></a>
+			<h1>Make a Payment</h1>
+			<a href="#menupanel1" class="ui-btn ui-btn-right" onclick="ClearErrors();">...</a>
+		</div><!-- /header -->
+
+
+		<div data-role="panel" id="menupanel1" data-position="right" style="margin-top:30px">
+			<a class="ui-btn maxw-200" href="#menu">Dashboard</a>
+			<!-- <a class="ui-btn maxw-200" href="#payment">Make a Payment</a> -->
+			<a class="ui-btn maxw-200" href="#loanDetails">Loan Details</a>
+			<a class="ui-btn maxw-200" href="#payHistory">Payment History</a>
+			<a class="ui-btn maxw-200" href="#upload">Uploads</a>
+			<a href="#login" onclick="Logoff()" class="ui-btn maxw-200 ui-icon-arrow-l ui-btn-icon-left"
+				data-direction="reverse">Logoff</a>
+		</div><!-- /content -->
+
+		<div role="main" class="ui-content">
+			<p>We'll take your money here.</p>
+			<table style="font-size: 0.8em;">
+				<tr>
+					<th>Total Amount Due:</th>
+					<td >
+						<div id="pmt-tAD" class="ui-input-text ui-body-inherit ui-corner-all ui-shadow-inset" style="padding:.6em"></div>
+					</td>
+				</tr>
+				<tr>
+					<th>Routing Number:</th>
+					<td ><input type=number id="pmt-rN" class="payment" pattern="[0-9]*"></td>
+				</tr>
+				<tr>
+					<th>Account Number:</th>
+					<td ><input type=number id="pmt-aN" class="payment" pattern="[0-9]*"></td>
+				</tr>
+				<tr>
+					<th>First Name on Account:</th>
+					<td ><input type=text class="payment" id="pmt-fN"></td>
+				</tr>
+				<tr>
+					<th>Last Name on Account:</th>
+					<td ><input type=text class="payment" id="pmt-lN"></td>
+				</tr>
+				<tr>
+					<th>Type of Account:</th>
+					<td >
+						<fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
+							<input type="radio" name="accountType" id="Checking" value="Checking" checked="checked">
+							<label for="Checking">Checking</label>
+							<input type="radio" name="accountType" id="Savings" value="Savings">
+							<label for="Savings">Savings</label>	
+						</fieldset>
+						<!-- <input type=text id="pmt-fN" placeholder="Checking or Savings"> -->
+					</td>
+				</tr>
+				<tr>
+					<th>Amount to Pay:</th>
+					<td><input type=number class="payment" pattern='^\d{0,6}(\.\d{1,2})?$' id='pmt-Amt'></td>
+				</tr>
+				<tr>
+					<th>Date to Pay:</th>
+					<td><input type="date" class="payment" id="pmt-Date"></td>
+				</tr>
+			</table>
+			
+			<button class="ui-btn" onclick="PayBill()">Submit</button>
+			
+			<p class='error'></p>
+		</div><!-- /content -->
+		<script>
+			$(document).ready(function(){
+				var today = new Date();
+				var maxDate = new Date();
+				maxDate.setMonth(maxDate.getMonth() + 1);
+				var dd = today.getDate();
+				var mm = today.getMonth()+1; //January is 0!
+				var yyyy = today.getFullYear();
+				if(dd<10){
+					dd='0'+dd
+				} 
+				if(mm<10){
+					mm='0'+mm
+				} 
+				today = yyyy+'-'+mm+'-'+dd;
+				var dd2 = maxDate.getDate();
+				var mm2 = maxDate.getMonth()+1;
+				var yyyy2 = maxDate.getFullYear();
+				if (dd2<10){
+					dd2='0'+dd2;
+				}
+				if(mm2<10){
+					mm2='0'+mm2
+				}
+				maxDate = yyyy2+'-'+mm2+'-'+dd2;
+				document.getElementById("pmt-Date").setAttribute("min", today);
+				console.log("Today");
+				console.log(today);
+				console.log("MaxDate");
+				console.log(maxDate);
+				document.getElementById("pmt-Date").setAttribute("max", maxDate);
+			});
+
+			function PayBill() {
+				var borrower = JSON.parse(sessionStorage.getItem('borrowerData'))[0];
+				var settings = {
+					"url": "https://development.nelnet.io/paymentapi/payments/ach",
+					"method": "POST",
+					"timeout": 0,
+					"headers": {
+						"Authorization": sessionStorage.getItem('token'),
+						"Accept": "application/json",
+						"Content-Type": "application/json"
+					},
+					"data": JSON.stringify({
+						"routingNumber": $('#pmt-rN').val(),
+						"bankAccount": $('#pmt-aN').val(),
+						"accountType":"Checking",
+						"source":"Web",
+						"firstName":$('#pmt-fN').val(),
+						"lastName":$('#pmt-lN').val(),
+						"payerId": JSON.parse(sessionStorage.getItem('loanData'))[0].borrowers[0].borrowerId,
+						"payerType":JSON.parse(sessionStorage.getItem('loanData'))[0].borrowers[0].borrowerType.charAt(0).toUpperCase() 
+									+ JSON.parse(sessionStorage.getItem('loanData'))[0].borrowers[0].borrowerType.substring(1),
+						"loanId":JSON.parse(sessionStorage.getItem('loanData'))[0].loanId,
+						"amount": parseFloat($('#pmt-Amt').val()),
+						"effectiveDate": $('#pmt-Date').val()
+					}),
+				};
+
+				$.ajax(settings).done(function (response) {
+					console.log(response);
+					$('.error').text('Payment submitted.').css('color','black');
+					$('.payment').val('');
+				}).fail(function(jqXHR, exception){
+					// err = true;
+					var msg = '';
+						if (jqXHR.status === 0) {
+							msg = 'Not connected. Verify Network.';
+						} else if (jqXHR.status == 404) { 
+							msg = "Requested page not found. [404]";
+						} else if (jqXHR.status == 500) {
+							msg = "Internal Service Error [500}.";
+						} else if (jqXHR.status == 401) {
+							msg = "Incorrect credentials.";
+						} else if (exception === 'parsererror') {
+							msg = "Requested JSON parse failed";
+						} else if (exception === 'timeout') {
+							msg = "Time out error.";
+						} else if (exception === 'abort') {
+							msg = "Ajax request aborted.";
+						} else {
+							msg = "uncaught error. \n" + jqXHR.responseText;
+						}
+						$('.error').html(msg).css('color','red');
+					
+						return false;
+				});
+			}
+			function ClearErrors() {
+				$('.error').text('').css('color','black');
+			}
+		</script>
+		<div data-role="footer" data-position="fixed">
+			<h4>Payment Questions? Call </h4>
+		</div><!-- /footer -->
+	</div><!-- /page -->
+
+	<!-- Loan Details -->
+	<div data-role="page" id="loanDetails">
+
+		<div data-role="header">
+			<a href="#menu" class="ui-btn ui-corner-all ui-icon-arrow-l ui-btn-icon-notext"
+				data-direction="reverse"></a>
+			<h1>Loan Details</h1>
+			<a href="#menupanel2" class="ui-btn ui-btn-right">...</a>
+		</div><!-- /header -->
+	<div data-role="panel" id="menupanel2" data-position="right" style="margin-top:30px">
+		<a class="ui-btn maxw-200" href="#menu">Dashboard</a>
+		<a class="ui-btn maxw-200" href="#payment">Make a Payment</a>
+		<!-- <a class="ui-btn maxw-200" href="#loanDetails">Loan Details</a> -->
+		<a class="ui-btn maxw-200" href="#payHistory">Payment History</a>
+		<a class="ui-btn maxw-200" href="#upload">Uploads</a>
+		<a href="#login" onclick="Logoff()" class="ui-btn maxw-200 ui-icon-arrow-l ui-btn-icon-left"
+			data-direction="reverse">Logoff</a>
+	</div><!-- /content -->
+		<div role="main" class="ui-content">
+			<h2 class="pb-2" id="lD-LoanHeader"></h2>
+			<p>Loan/Term</p>
+			<table class="table table-striped" style="font-size:0.8em">
+				<tr>
+					<th>Lender Name</th>
+					<td class="dashboard calc-field" id="lD-lenderName"></td>
+				</tr>
+				<tr>
+					<th>Loan Program</th>
+					<td class="dashboard calc-field" id="lD-loanProgram"></td>
+				</tr>
+				<tr>
+					<th>Loan Status</th>
+					<td class="dashboard calc-field text-capitalize" id="lD-loanStatus"></td>					
+				</tr>
+				<tr>
+					<th>First Disbursement Date</th>
+					<td class="dashboard calc-field" id="lD-fDD"></td>
+				</tr>
+				<tr>
+					<th>Original Loan Amount</th>
+					<td class="dashboard calc-field" id="lD-oLA"></td>
+				</tr>
+				<tr>
+					<th>Outstanding Principal Balance</th>
+					<td class="dashboard calc-field" id="lD-oPB"></td>
+				</tr>
+				<tr>
+					<th>Original Term</th>
+					<td class="dashboard calc-field" id="lD-oTerm"></td>
+				</tr>
+				<tr>
+					<th>Remaining Term</th>
+					<td class="dashboard calc-field" id="lD-rTerm"></td>
+				</tr>
+				<tr>
+					<th>Maturity Date</th>
+					<td class="dashboard calc-field" id="lD-mDate"></td>
+				</tr>
+			</table>
+			<p>Interest/Fees</p>
+			<table class="table table-striped" style="font-size:0.8em">
+				<tr>
+					<th>Interest Rate</th>
+					<td class="dashboard calc-field" id="lD-interestRate"></td>
+				</tr>
+				<tr>
+					<th>Daily Interest <i>(estimated)</i></th>
+					<td class="dashboard calc-field" id="lD-dailyInterest"></td>
+				</tr>
+				<tr>
+					<th>Interest Rate Type</th>
+					<td class="dashboard calc-field" id="lD-interestRateType"></td>
+				</tr>
+				<tr>
+					<th>Total Interest Paid</th>
+					<td class="dashboard calc-field" id="lD-totalInterestPaid"></td>
+				</tr>
+				<tr>
+					<th>Outstanding Interest</th>
+					<td class="dashboard calc-field" id="lD-outstandingInterest"></td>
+				</tr>
+				<tr>
+					<th>Servicer Fees</th>
+					<td class="dashboard calc-field" id="lD-servicerFees"></td>
+				</tr>
+				<tr>
+					<th>Lender Fees</th>
+					<td class="dashboard calc-field" id="lD-lenderFees"></td>
+				</tr>
+				<tr>
+					<th>APR</th>
+					<td class="dashboard calc-field" id="lD-APR"></td>
+				</tr>
+			</table>
+			<p>Payments</p>
+			<table class="table table-striped" style="font-size:0.8em">
+				<tr>
+					<th>Regular Payment Amount</th>
+					<td class="dashboard calc-field" id="lD-regularPaymentAmount"></td>
+				</tr>
+				<tr>
+					<th>Current Day Payoff Amount</th>
+					<td class="dashboard calc-field" id="lD-currentPayoffAmount"></td>
+				</tr>
+				<tr>
+					<th>Last Payment Date</th>
+					<td class="dashboard calc-field" id="lD-lastPaymentDate"></td>
+				</tr>
+				<tr>
+					<th>Last Payment Amount</th>
+					<td class="dashboard calc-field" id="lD-lastPaymentAmount"></td>
+				</tr>
+				<tr>
+					<th>Days Past Due</th>
+					<td class="dashboard calc-field" id="lD-daysPastDue"></td>
+				</tr>
+				<tr>
+					<th>Next Due Date</th>
+					<td class="dashboard calc-field" id="lD-nextDueDate"></td>
+				</tr>
+				<tr>
+					<th>Past Due Amount</th>
+					<td class="dashboard calc-field" id="lD-pastDueAmount"></td>
+				</tr>
+				<tr>
+					<th>Current Amount Due</th>
+					<td class="dashboard calc-field" id="lD-currentAmountDue"></td>
+				</tr>
+			</table>
+			<p>Benefits/Misc</p>
+			<table class="table table-striped" style="font-size:0.8em">
+				<tr>
+					<th>Military Benefit</th>
+					<td class="dashboard calc-field" id="lD-militaryBenefit"></td>
+				</tr>
+				<tr>
+					<th>Loan GUID</th>
+					<td class="dashboard calc-field" id="lD-loanGUID"></td>
+				</tr>
+				<tr>
+					<th>External Reference ID</th>
+					<td class="dashboard calc-field" id="lD-externalReferenceID"></td>
+				</tr>
+			</table>
+		</div><!-- /content -->
+
+		<div data-role="footer" data-position="fixed">
+			<h4>Page Footer</h4>
+		</div><!-- /footer -->
+	</div><!-- /page -->
+
+
+
+
+
+	<!-- Start of fourth page -->
+	<div data-role="page" id="payHistory">
+
+		<div data-role="header">
+			<a href="#menu" class="ui-btn ui-corner-all ui-icon-arrow-l ui-btn-icon-notext" data-direction="reverse"> < 
+				</a> <h1>Payment History</h1>
+				<a href="#menupanel3" class="ui-btn ui-btn-right">...</a>
+		</div><!-- /header -->
+		<div data-role="panel" id="menupanel3" data-position="right" style="margin-top:30px">
+			<a class="ui-btn maxw-200" href="#menu">Dashboard</a>
+			<a class="ui-btn maxw-200" href="#payment">Make a Payment</a>
+			<a class="ui-btn maxw-200" href="#loanDetails">Loan Details</a>
+			<!-- <a class="ui-btn maxw-200" href="#payHistory">Documents and Forms</a> -->
+			<a class="ui-btn maxw-200" href="#upload">Uploads</a>
+			<a href="#login" onclick="Logoff()" class="ui-btn maxw-200 ui-icon-arrow-l ui-btn-icon-left"
+				data-direction="reverse">Logoff</a>
+		</div><!-- /content -->
+		<div role="main" class="ui-content">
+			<table class="table table-striped" id="paymentHistory"></table>
+
+
+		</div><!-- /content -->
+
+		<div data-role="footer" data-position="fixed">
+			<h4>Questions? Call us!</h4>
+		</div><!-- /footer -->
+	</div><!-- /page -->
+
+
+	<!-- Start of fifth page -->
+	<div data-role="page" id="upload">
+
+		<div data-role="header">
+			<a href="#menu" class="ui-btn ui-corner-all ui-icon-arrow-l ui-btn-icon-notext" data-direction="reverse">
+				<</a> <h1>Uploads</h1>
+				<a href="#menupanel4" class="ui-btn ui-btn-right">...</a>
+		</div><!-- /header -->
+		<div data-role="panel" id="menupanel4" data-position="right" style="margin-top:30px">
+			<a class="ui-btn maxw-200" href="#menu">Dashboard</a>
+			<a class="ui-btn maxw-200" href="#payment">Make a Payment</a>
+			<a class="ui-btn maxw-200" href="#loanDetails">Loan Details</a>
+			<a class="ui-btn maxw-200" href="#payHistory">Payment History</a>
+			<!-- <a class="ui-btn maxw-200" href="#upload">Uploads</a> -->
+			<a href="#login" onclick="Logoff()" class="ui-btn maxw-200 ui-icon-arrow-l ui-btn-icon-left"
+				data-direction="reverse">Logoff</a>
+		</div><!-- /content -->
+		<div role="main" class="ui-content">
+
+		</div><!-- /content -->
+
+		<div data-role="footer" data-position="fixed">
+			<h4>Do you qualify for loan benefits?</h4>
+		</div><!-- /footer -->
+	</div><!-- /page -->
+</body>
+
+=======
 <!DOCTYPE html>
 <html>
 
@@ -1072,4 +2167,5 @@
 	</div><!-- /page -->
 </body>
 
+>>>>>>> c5ca9bf15f4b88a32ee78d6eac85b00932ddec9e
 </html>

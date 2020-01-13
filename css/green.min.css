@@ -16,6 +16,12 @@
 html {
 	font-size: 100%;
 }
+body {
+	
+}
+#paymentHistory {
+	font-size: 0.6em;
+}
 body,
 input,
 select,
