@@ -431,10 +431,26 @@
 				if (err){
 					return false;
 				}
+				var items = '';
+				var i = 0;
+				y = JSON.parse(sessionStorage.getItem('loanData'));
+				y.forEach(function(loan) {
+					items += "<option value='"+i+ "'" + ( i == 0 ? ' selected ' : '') + ">"+loan.loanNumberFormatted+"</option>";
+					i++;
+				})
+				$("#currentLoan").html(items);
+				$("#currentLoan").trigger("change");
 
+				LoadDataToScreen(0);				
+			});
+
+			function LoadDataToScreen(currLoan) {
 				// loan balances loop
+				if (currLoan !== 0) {
+					currLoan = parseInt(currLoan);
+				}
 				var y = JSON.parse(sessionStorage.getItem('loanBalances'));
-				var x = parseFloat($('#dashboard-totalBal').text());
+				var x = 0; //parseFloat($('#dashboard-totalBal').text());
 				var lPD = '0001-01-01';
 				var nDD = '0001-01-01';
 				var pTD = '0001-01-01';
@@ -442,19 +458,18 @@
 				var fAD = 0;
 				var pAD = 0;
 				var tAD = 0;
-				$('#lD-oPB').text(ConvertToCurrency(y[0].totalPrincipalAmount));
-				$('#lD-totalInterestPaid').text(ConvertToCurrency(y[0].totalInterestPaid));
-				$('#lD-outstandingInterest').text(ConvertToCurrency(y[0].totalInterestAmount));
-				$('#lD-servicerFees').text(ConvertToCurrency(y[0].totalServicerFeeAmount));
-				$('#lD-lenderFees').text(ConvertToCurrency(y[0].totalLenderFeeAmount));
-				$('#lD-dailyInterest').text(ConvertToCurrency(y[0].perDiem.amount));
+				$('#lD-oPB').text(ConvertToCurrency(y[currLoan].totalPrincipalAmount));
+				$('#lD-totalInterestPaid').text(ConvertToCurrency(y[currLoan].totalInterestPaid));
+				$('#lD-outstandingInterest').text(ConvertToCurrency(y[currLoan].totalInterestAmount));
+				$('#lD-servicerFees').text(ConvertToCurrency(y[currLoan].totalServicerFeeAmount));
+				$('#lD-lenderFees').text(ConvertToCurrency(y[currLoan].totalLenderFeeAmount));
+				$('#lD-dailyInterest').text(ConvertToCurrency(y[currLoan].perDiem.amount));
 				y.forEach(function (bal) {
 					x += bal.feeBalance + bal.interestBalance + bal.principalBalance;
 					if (lPD < bal.lastPaymentDate) {
 						lPD = bal.lastPaymentDate;
-					}
-					
-				})
+					}					
+				});
 
 				$('#dashboard-lastPaymentDate').text(ConvertDate(lPD));
 				$('#dashboard-totalBal').text(ConvertToCurrency(x));
@@ -475,7 +490,7 @@
 					fAD += ConvertToCurrency(pD.feeAmountDue);
 					pAD += ConvertToCurrency(pD.pastAmountDue);
 					tAD += ConvertToCurrency(pD.totalAmountDue);
-				})
+				});
 
 				$('#dashboard-nextDueDate').text(ConvertDate(nDD));
 				$('#dashboard-paidToDate').text(ConvertDate(pTD));
@@ -484,10 +499,10 @@
 				$('#dashboard-feeAmtDue').text(ConvertToCurrency(fAD));
 				$('#dashboard-totalAmtDue').text(ConvertToCurrency(tAD));
 				$('#pmt-tAD').text(ConvertToCurrency(tAD));
-				$('#lD-daysPastDue').text(y[0].daysLate)
+				$('#lD-daysPastDue').text(y[currLoan].daysLate)
 
                 // payment history loop
-                y = JSON.parse(sessionStorage.getItem('paymentHistory'))[0];
+                y = JSON.parse(sessionStorage.getItem('paymentHistory'))[currLoan];
 				var pH = "<thead><tr>" +
 				    "<th>Type</th><th >Date</th><th >Amount</th>" +
 				    "<th >Principal Paid</th><th  >Interest Paid</th>" +
@@ -507,7 +522,7 @@
 				$('#paymentHistory').html(pH);
 				// loans loop
 
-				y = JSON.parse(sessionStorage.getItem('loanData'))[0];
+				y = JSON.parse(sessionStorage.getItem('loanData'))[currLoan];
 				$('#lD-loanStatus').text(y.status);
 				$('#lD-fDD').text(ConvertDate(y.disbursementDate));
 				$('#lD-oLA').text(ConvertToCurrency(y.amount));
@@ -516,15 +531,15 @@
 				$('#lD-interestRateType').text(y.rateType);
 				$('#lD-militaryBenefit').text(y.isScraActive ? 'Yes' : 'No');
 				$('#lD-loanGUID').text(y.loanId);
-				$('#lD-externalReferenceID').text(y.externalReferenceId)
+				$('#lD-externalReferenceID').text(y.externalReferenceId);
 				
 				// payment schedules loop
 
-				y = JSON.parse(sessionStorage.getItem('paymentSchedules'))[0][0];
+				y = JSON.parse(sessionStorage.getItem('paymentSchedules'))[currLoan][0];
 				$('#lD-APR').text(y.apr);
 
 				// loan details loop
-				y = JSON.parse(sessionStorage.getItem('loanDetails'))[0];
+				y = JSON.parse(sessionStorage.getItem('loanDetails'))[currLoan];
 				$('#lD-rTerm').text(y.remainingTerm);
 				$('#lD-regularPaymentAmount').text(ConvertToCurrency(y.regularPaymentAmount));
 				$('#lD-nextDueDate').text(ConvertDate(y.nextDueDate));
@@ -532,28 +547,28 @@
 				$('#lD-currentAmountDue').text(ConvertToCurrency(y.currentAmountDue));
 
 				// loan programs loop
-				y = JSON.parse(sessionStorage.getItem('loanPrograms'))[0];
+				y = JSON.parse(sessionStorage.getItem('loanPrograms'))[currLoan];
 				$('#lD-loanProgram').text(y.description);
-				y = JSON.parse(sessionStorage.getItem('lenders'))[0];
+				y = JSON.parse(sessionStorage.getItem('lenders'))[currLoan];
 				$('#lD-lenderName').text(y.name);
 
 				// loan payoff loop
-				y = JSON.parse(sessionStorage.getItem('loanPayoffs'))[0];
+				y = JSON.parse(sessionStorage.getItem('loanPayoffs'))[currLoan];
 				$('#lD-currentPayoffAmount').text(ConvertToCurrency(y.payoffAmount));
 
 				// last payments loop
-				y = JSON.parse(sessionStorage.getItem('lastPayments'))[0][0];
+				y = JSON.parse(sessionStorage.getItem('lastPayments'))[currLoan][0];
 				$('#lD-lastPaymentAmount').text(ConvertToCurrency(y.transactionAmount));
 				$('#lD-lastPaymentDate').text(ConvertDate(y.transactionDate));
 				// maturity loop
-				y = JSON.parse(sessionStorage.getItem('maturityDetails'))[0];
+				y = JSON.parse(sessionStorage.getItem('maturityDetails'))[currLoan];
 				$('#lD-mDate').text(ConvertDate(y.maturityDate));
 
 				$('.calc-field').css('display', 'block');
 				$('.loading').css('display', 'none');
 				$('.error').text('');
 				// place code to be executed on completion of last outstanding ajax call here
-			});
+			};
 
             function ConvertToCurrency(value){
                 value = parseFloat(value).toFixed(2)
@@ -593,6 +608,8 @@
 		</div><!-- /content -->
 
 		<div data-role="main" class="ui-content">
+			<h2>Loan</h2>
+			<select name="currentLoan" id="currentLoan" onchange="LoadDataToScreen(this.value)"></select>
 			<h2>Dashboard</h2>
 			<table class="table table-striped" style="font-size: 0.8em;">
 				<tbody>
