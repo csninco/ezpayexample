@@ -56,7 +56,7 @@
 		</div><!-- /footer -->
 		<script>
 			var err = false;
-
+			var authorized = false;
 			function Validate() {
 				if (document.getElementById('Username').value == '' || document.getElementById('Username').value == undefined) {
 					$('.error').text('Username is empty');
@@ -80,6 +80,7 @@
 
 				$.ajax(settings).done(function (response) {
 					err = false;
+					authorized = true;
 					$('.error').text('');
 					console.log(response);
 					sessionStorage.setItem("token", "Bearer " + response.data.accessToken);
@@ -185,12 +186,26 @@
 						console.log('paymentHistory')
 						console.log(response);
 						$('.error').text('Payment History API Complete');
-
-						paymentHistory.push(response.data);
+						if (paymentHistory == []) {
+							paymentHistory.push(response.data);
+						} else {
+							paymentHistory.splice(GetLoanIndex(response.data[0].loanId), 0, response.data);
+						}
 						sessionStorage.setItem("paymentHistory", JSON.stringify(paymentHistory));
 					});
                 });
-            }
+			}
+			
+			function GetLoanIndex(loanId) {
+				var x = JSON.parse(sessionStorage.getItem('loanData'));
+				for (let index = 0; index < x.length; index++) {
+					const element = x[index];
+					if (loanId == element.loanId) {
+						return index;
+					}					
+				}
+				return 0;
+			}
 			function GetLastPayment(loans) {
 
 				var lastPayments = [];
@@ -213,7 +228,12 @@
 						console.log(response);
 						$('.error').text('Last Payment API Complete');
 
-						lastPayments.push(response.data);
+						// lastPayments.push(response.data);
+						if (lastPayments == []) {
+							lastPayments.push(response.data);
+						} else {
+							lastPayments.splice(GetLoanIndex(response.data[0].loanId), 0, response.data);
+						}
 						sessionStorage.setItem("lastPayments", JSON.stringify(lastPayments));
 					});
 				});
@@ -240,7 +260,12 @@
 						console.log(response);
 						$('.error').text('Payment Schedules API Complete');
 
-						paymentSchedules.push(response.data);
+						// paymentSchedules.push(response.data);
+						if (paymentSchedules == []) {
+							paymentSchedules.push(response.data);
+						} else {
+							paymentSchedules.splice(GetLoanIndex(response.data[0].loanId), 0, response.data);
+						}
 						sessionStorage.setItem("paymentSchedules", JSON.stringify(paymentSchedules));
 					});
 				});			
@@ -266,7 +291,12 @@
 						console.log(response);
 						$('.error').text('Payoff API Complete');
 
-						loanPayoffs.push(response.data);
+						// loanPayoffs.push(response.data);
+						if (loanPayoffs == []) {
+							loanPayoffs.push(response.data);
+						} else {
+							loanPayoffs.splice(GetLoanIndex(response.data.loanId), 0, response.data);
+						}
 						sessionStorage.setItem("loanPayoffs", JSON.stringify(loanPayoffs));
 					});
 				})
@@ -292,7 +322,12 @@
 						console.log(response);
 						$('.error').text('Maturity Details API Complete');
 
-						maturityDetails.push(response.data);
+						//maturityDetails.push(response.data);
+						if (maturityDetails == []) {
+							maturityDetails.push(response.data);
+						} else {
+							maturityDetails.splice(GetLoanIndex(response.data.loanId), 0, response.data);
+						}
 						sessionStorage.setItem("maturityDetails", JSON.stringify(maturityDetails));
 					});
 				});
@@ -319,7 +354,12 @@
 						console.log(response);
 						$('.error').text('Loan Details API Complete');
 
-						loanDetails.push(response.data);
+						//loanDetails.push(response.data);
+						if (loanDetails == []) {
+							loanDetails.push(response.data);
+						} else {
+							loanDetails.splice(GetLoanIndex(response.data.loanId), 0, response.data);
+						}
 						sessionStorage.setItem("loanDetails", JSON.stringify(loanDetails));
 					});
 				})
@@ -397,7 +437,12 @@
 						console.log(response);
 						$('.error').text('Loan Balances API Complete');
 
-						loanBalances.push(response.data);
+						//loanBalances.push(response.data);
+						if (loanBalances == []) {
+							loanBalances.push(response.data);
+						} else {
+							loanBalances.splice(GetLoanIndex(response.data.loanId), 0, response.data);
+						}
 						sessionStorage.setItem("loanBalances", JSON.stringify(loanBalances));
 					});
 				});
@@ -423,7 +468,12 @@
 						console.log(response);
 						$('.error').text('Payment Due API Complete');
 
-						paymentDues.push(response.data);
+						//paymentDues.push(response.data);
+						if (paymentDues == []) {
+							paymentDues.push(response.data);
+						} else {
+							paymentDues.splice(GetLoanIndex(response.data.loanId), 0, response.data);
+						}
 						sessionStorage.setItem("paymentDues", JSON.stringify(paymentDues));
 					});
 				});
@@ -572,7 +622,9 @@
 
 				y = JSON.parse(sessionStorage.getItem('borrowerData'))[0];
 				$('#greeting').text("Hello, " + y.firstName);
-				$('#lD-LoanHeader').text('Loan: ' + $('#currentLoan').children('option:selected').text());
+				$('.loanHeader').each(function () {
+					$(this).text('Loan: ' + $('#currentLoan').children('option:selected').text());
+				});
 				$('.calc-field').css('display', 'block');
 				$('.loading').css('display', 'none');
 				$('.error').text('');
@@ -585,13 +637,18 @@
             }
             
 			function ConvertDate(dT) {
-				return dT.substr(5,2) + '/' + dT.substr(8,2) + '/' + dT.substr(0,4)
+				if (dT != undefined && dT != null) {
+					return dT.substr(5,2) + '/' + dT.substr(8,2) + '/' + dT.substr(0,4);
+				}
+				return dT;
 			}
 
 			$(document).ready(function(){
 				//var currLoan = $('#currentLoan').children("option:selected").val();
-				LoadLoanDropDown();
-				LoadDataToScreen(0);
+				if (authorized) {
+					LoadLoanDropDown();
+					LoadDataToScreen(0);
+				}
 			})
 		</script>
 	</div><!-- /page -->
@@ -718,6 +775,7 @@
 
 		<div role="main" class="ui-content">
 			<p>We'll take your money here.</p>
+			<h2 class="pb-2 loanHeader"></h2>
 			<table style="font-size: 0.8em;">
 				<tr>
 					<th>Total Amount Due:</th>
@@ -769,6 +827,7 @@
 		</div><!-- /content -->
 		<script>
 			$(document).ready(function(){
+
 				var today = new Date();
 				var maxDate = new Date();
 				maxDate.setMonth(maxDate.getMonth() + 1);
@@ -884,7 +943,7 @@
 			data-direction="reverse">Logoff</a>
 	</div><!-- /content -->
 		<div role="main" class="ui-content">
-			<h2 class="pb-2" id="lD-LoanHeader"></h2>
+			<h2 class="pb-2 loanHeader"></h2>
 			<p>Loan/Term</p>
 			<table class="table table-striped" style="font-size:0.8em">
 				<tr>
@@ -1038,6 +1097,7 @@
 				data-direction="reverse">Logoff</a>
 		</div><!-- /content -->
 		<div role="main" class="ui-content">
+			<h2 class="pb-2 loanHeader"></h2>
 			<table class="table table-striped" id="paymentHistory"></table>
 
 
@@ -1067,7 +1127,7 @@
 				data-direction="reverse">Logoff</a>
 		</div><!-- /content -->
 		<div role="main" class="ui-content">
-
+			<!-- <h2 class="pb-2" class="loanHeader"></h2> -->
 		</div><!-- /content -->
 
 		<div data-role="footer" data-position="fixed">
