@@ -57,6 +57,7 @@
 		<script>
 			var err = false;
 			var authorized = false;
+			var paymentMade = false;
 			function Validate() {
 				if (document.getElementById('Username').value == '' || document.getElementById('Username').value == undefined) {
 					$('.error').text('Username is empty');
@@ -86,8 +87,7 @@
 					sessionStorage.setItem("token", "Bearer " + response.data.accessToken);
 					GetBorrowerData();
 					window.location = "#menu";
-					$('.calc-field').hide(); //css('display','none');
-					$('.loading').show(); //css('display', 'block')
+
 				}).fail(function(jqXHR, exception){
 					err = true;
 					var msg = '';
@@ -136,15 +136,15 @@
 			}
 
 			function GetLoanData() {
+				$('.calc-field').hide();
+				$('.loading').show();
 				var settings = {
 					"url": "https://development.nelnet.io/loanapi/loans",
 					"method": "GET",
 					"timeout": 0,
 					"headers": {
 						"Authorization": sessionStorage.getItem("token"),
-						"Content-Type": "application/json",
-						"tenantid": "314",
-						"clientid": "2"
+						"Content-Type": "application/json"
 					},
 				};
 
@@ -484,8 +484,8 @@
 					return false;
 				}
 
-				LoadLoanDropDown();
-				LoadDataToScreen(0);				
+				setTimeout(function() { LoadLoanDropDown(); }, 1000);
+				setTimeout(function() { LoadDataToScreen(0); }, 2000);
 			});
 
 			function LoadLoanDropDown() {
@@ -890,6 +890,18 @@
 					console.log(response);
 					$('.resp').text('Payment submitted.').css('color','black');
 					$('.payment').val('');
+					sessionStorage.removeItem('loanData');
+					sessionStorage.removeItem('paymentHistory');
+					sessionStorage.removeItem('lastPayments');
+					sessionStorage.removeItem('paymentSchedules');
+					sessionStorage.removeItem('loanPayoffs');
+					sessionStorage.removeItem('maturityDetails');
+					sessionStorage.removeItem('loanDetails');
+					sessionStorage.removeItem('loanPrograms');
+					sessionStorage.removeItem('lenders');
+					sessionStorage.removeItem('loanBalances');
+					sessionStorage.removeItem('paymentDues');
+					setTimeout(function() { GetLoanData(); }, 3000);
 				}).fail(function(jqXHR, exception){
 					// err = true;
 					var msg = '';
