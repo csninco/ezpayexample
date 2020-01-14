@@ -13,9 +13,19 @@
       An example portal to use Velocity APIs.
   </description>
 
-  <author href="https://build.phonegap.com" email="support@phonegap.com">
+  <author href="https://chris-nichols.me" email="chris@chris-nichols.me">
       Someone interested
   </author>
+
+  <preference name="target-device" value="universal" />
+  <preference name="prerendered-icon" value="true" />
+  <preference name="detect-data-types" value="false" />
+  <preference name="exit-on-suspend" value="true" />
+  <preference name="deployment-target" value="10.0" />
+
+  <platform name="ios">
+    <splash src="splash.png" width="240" height="360" />
+  </platform>
   
   <icon src="icon.png" width="150" height="150" />
   <icon src="icon57.png" platform="ios" width="57" height="57" />
