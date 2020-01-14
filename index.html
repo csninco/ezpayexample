@@ -542,10 +542,10 @@
 					if (pTD < pD.paidToDate) {
 						pTD = pD.paidToDate;
 					}
-					cAD += ConvertToCurrency(pD.currentAmountDue);
-					fAD += ConvertToCurrency(pD.feeAmountDue);
-					pAD += ConvertToCurrency(pD.pastAmountDue);
-					tAD += ConvertToCurrency(pD.totalAmountDue);
+					cAD += pD.currentAmountDue;
+					fAD += pD.feeAmountDue;
+					pAD += pD.pastAmountDue;
+					tAD += pD.totalAmountDue;
 				});
 
 				$('#dashboard-nextDueDate').text(ConvertDate(nDD));
@@ -944,8 +944,8 @@
 	</div><!-- /content -->
 		<div role="main" class="ui-content">
 			<h4 class="pb-2 loanHeader"></h4>
-			<p>Loan/Term</p>
-			<table class="table table-striped" style="font-size:0.8em">
+			<h5>Loan/Term</h5>
+			<table class="table table-striped"  style="font-size:0.8em">
 				<tr>
 					<th>Lender Name</th>
 					<td class="dashboard calc-field" id="lD-lenderName"></td>
@@ -983,8 +983,8 @@
 					<td class="dashboard calc-field" id="lD-mDate"></td>
 				</tr>
 			</table>
-			<p>Interest/Fees</p>
-			<table class="table table-striped" style="font-size:0.8em">
+			<h5>Interest/Fees</h5>
+			<table class="table table-striped"  style="font-size:0.8em">
 				<tr>
 					<th>Interest Rate</th>
 					<td class="dashboard calc-field" id="lD-interestRate"></td>
@@ -1018,8 +1018,8 @@
 					<td class="dashboard calc-field" id="lD-APR"></td>
 				</tr>
 			</table>
-			<p>Payments</p>
-			<table class="table table-striped" style="font-size:0.8em">
+			<h5>Payments</h5>
+			<table class="table table-striped"  style="font-size:0.8em">
 				<tr>
 					<th>Regular Payment Amount</th>
 					<td class="dashboard calc-field" id="lD-regularPaymentAmount"></td>
@@ -1053,7 +1053,7 @@
 					<td class="dashboard calc-field" id="lD-currentAmountDue"></td>
 				</tr>
 			</table>
-			<p>Benefits/Misc</p>
+			<h5>Benefits/Misc</h5>
 			<table class="table table-striped" style="font-size:0.8em">
 				<tr>
 					<th>Military Benefit</th>

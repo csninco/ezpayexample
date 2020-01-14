@@ -17,6 +17,7 @@
       Someone interested
   </author>
 
+<icon src="icon57.png" platform="ios" width="57" height="57" />
   <!-- <preference name="target-device" value="universal" />
   <preference name="prerendered-icon" value="true" />
   <preference name="detect-data-types" value="false" />
