@@ -464,11 +464,11 @@
 				var fAD = 0;
 				var pAD = 0;
 				var tAD = 0;
-				$('#lD-oPB').text(ConvertToCurrency(y[currLoan].totalPrincipalAmount));
+				$('#lD-oPB').text(ConvertToCurrency(y[currLoan].principalBalance));
 				$('#lD-totalInterestPaid').text(ConvertToCurrency(y[currLoan].totalInterestPaid));
 				$('#lD-outstandingInterest').text(ConvertToCurrency(y[currLoan].totalInterestAmount));
-				$('#lD-servicerFees').text(ConvertToCurrency(y[currLoan].totalServicerFeeAmount));
-				$('#lD-lenderFees').text(ConvertToCurrency(y[currLoan].totalLenderFeeAmount));
+				$('#lD-servicerFees').text(ConvertToCurrency(y[currLoan].servicerFeeBalance));
+				$('#lD-lenderFees').text(ConvertToCurrency(y[currLoan].lenderFeeBalance));
 				$('#lD-dailyInterest').text(ConvertToCurrency(y[currLoan].perDiem.amount));
 				y.forEach(function (bal) {
 					x += bal.feeBalance + bal.interestBalance + bal.principalBalance;
@@ -585,8 +585,7 @@
             }
             
 			function ConvertDate(dT) {
-				var d = new Date(dT);
-				return d.getMonth() + 1 + '/' + d.getDate() + '/' + d.getFullYear();
+				return dT.substr(5,2) + '/' + dT.substr(8,2) + '/' + dT.substr(0,4)
 			}
 
 			$(document).ready(function(){
@@ -766,7 +765,7 @@
 			
 			<button class="ui-btn" onclick="PayBill()">Submit</button>
 			
-			<p class='error'></p>
+			<p class='resp'></p>
 		</div><!-- /content -->
 		<script>
 			$(document).ready(function(){
@@ -830,7 +829,7 @@
 
 				$.ajax(settings).done(function (response) {
 					console.log(response);
-					$('.error').text('Payment submitted.').css('color','black');
+					$('.resp').text('Payment submitted.').css('color','black');
 					$('.payment').val('');
 				}).fail(function(jqXHR, exception){
 					// err = true;
@@ -852,13 +851,13 @@
 						} else {
 							msg = "uncaught error. \n" + jqXHR.responseText;
 						}
-						$('.error').html(msg).css('color','red');
+						$('.resp').html(msg).css('color','red');
 					
 						return false;
 				});
 			}
 			function ClearErrors() {
-				$('.error').text('').css('color','black');
+				$('.resp').text('').css('color','black');
 			}
 		</script>
 		<div data-role="footer" data-position="fixed">
