@@ -466,7 +466,7 @@
 				var tAD = 0;
 				$('#lD-oPB').text(ConvertToCurrency(y[currLoan].principalBalance));
 				$('#lD-totalInterestPaid').text(ConvertToCurrency(y[currLoan].totalInterestPaid));
-				$('#lD-outstandingInterest').text(ConvertToCurrency(y[currLoan].totalInterestAmount));
+				$('#lD-outstandingInterest').text(ConvertToCurrency(y[currLoan].interestBalance));
 				$('#lD-servicerFees').text(ConvertToCurrency(y[currLoan].servicerFeeBalance));
 				$('#lD-lenderFees').text(ConvertToCurrency(y[currLoan].lenderFeeBalance));
 				$('#lD-dailyInterest').text(ConvertToCurrency(y[currLoan].perDiem.amount));
