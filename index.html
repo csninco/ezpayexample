@@ -35,7 +35,7 @@
 	<!-- Start of first page -->
 	<div data-role="page" id="login">
 
-		<div data-role="header">
+		<div data-role="header" data-position="fixed">
 			<h1 style="margin:0">Welcome to EZ Pay!</h1>
 		</div><!-- /header -->
 
@@ -658,7 +658,7 @@
 	<!-- Dashboard -->
 	<div data-role="page" id="menu">
 
-		<div data-role="header">
+		<div data-role="header" data-position="fixed">
 			<h1 id="greeting"></h1>
 			<a href="#menupanel" class="ui-btn ui-btn-right">...</a>
 		</div><!-- /header -->
@@ -755,7 +755,7 @@
 	<!-- Payment -->
 	<div data-role="page" id="payment">
 
-		<div data-role="header">
+		<div data-role="header" data-position="fixed">
 			<a href="#menu" class="ui-btn ui-corner-all ui-icon-arrow-l ui-btn-icon-notext"
 				data-direction="reverse" onclick='ClearErrors()'></a>
 			<h1>Make a Payment</h1>
@@ -775,7 +775,7 @@
 
 		<div role="main" class="ui-content">
 			<p>We'll take your money here.</p>
-			<h2 class="pb-2 loanHeader"></h2>
+			<h3 class="pb-2 loanHeader"></h3>
 			<table style="font-size: 0.8em;">
 				<tr>
 					<th>Total Amount Due:</th>
@@ -927,7 +927,7 @@
 	<!-- Loan Details -->
 	<div data-role="page" id="loanDetails">
 
-		<div data-role="header">
+		<div data-role="header" data-position="fixed">
 			<a href="#menu" class="ui-btn ui-corner-all ui-icon-arrow-l ui-btn-icon-notext"
 				data-direction="reverse"></a>
 			<h1>Loan Details</h1>
@@ -943,7 +943,7 @@
 			data-direction="reverse">Logoff</a>
 	</div><!-- /content -->
 		<div role="main" class="ui-content">
-			<h2 class="pb-2 loanHeader"></h2>
+			<h3 class="pb-2 loanHeader"></h3>
 			<p>Loan/Term</p>
 			<table class="table table-striped" style="font-size:0.8em">
 				<tr>
@@ -1082,7 +1082,7 @@
 	<!-- Start of fourth page -->
 	<div data-role="page" id="payHistory">
 
-		<div data-role="header">
+		<div data-role="header" data-position="fixed">
 			<a href="#menu" class="ui-btn ui-corner-all ui-icon-arrow-l ui-btn-icon-notext" data-direction="reverse"> < 
 				</a> <h1>Payment History</h1>
 				<a href="#menupanel3" class="ui-btn ui-btn-right">...</a>
@@ -1097,7 +1097,7 @@
 				data-direction="reverse">Logoff</a>
 		</div><!-- /content -->
 		<div role="main" class="ui-content">
-			<h2 class="pb-2 loanHeader"></h2>
+			<h3 class="pb-2 loanHeader"></h3>
 			<table class="table table-striped" id="paymentHistory"></table>
 
 
@@ -1112,7 +1112,7 @@
 	<!-- Start of fifth page -->
 	<div data-role="page" id="upload">
 
-		<div data-role="header">
+		<div data-role="header" data-position="fixed">
 			<a href="#menu" class="ui-btn ui-corner-all ui-icon-arrow-l ui-btn-icon-notext" data-direction="reverse">
 				<</a> <h1>Uploads</h1>
 				<a href="#menupanel4" class="ui-btn ui-btn-right">...</a>
