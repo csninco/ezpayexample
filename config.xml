@@ -17,8 +17,8 @@
       Someone interested
   </author>
   
-  <icon src="icon.png" />
-  <splash src="splash.png" />
+  <icon src="icon.png" width="150" height="150" />
+  <splash src="splash.png" width="240" height="360" />
 
   <!-- Android only -->
   <preference name="android-build-tool" value="ant|gradle" />
