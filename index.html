@@ -59,6 +59,7 @@
 			var authorized = false;
 			var paymentMade = false;
 			var screenLoaded = false;
+			var currentLoanIndex = 0;
 			function Validate() {
 				if (document.getElementById('Username').value == '' || document.getElementById('Username').value == undefined) {
 					$('.error').text('Username is empty');
@@ -487,7 +488,7 @@
 					return false;
 				}
 
-				setTimeout(function() { LoadLoanDropDown(); }, 1000);
+				setTimeout(function() { LoadLoanDropDown(); }, 5000);
 				if (!screenLoaded) {
 					setTimeout(function() { LoadDataToScreen(0); }, 2000);
 				}
@@ -510,6 +511,7 @@
 				if (currLoan !== 0) {
 					currLoan = parseInt(currLoan);
 				}
+				currentLoanIndex = currLoan;
 				var y = JSON.parse(sessionStorage.getItem('loanBalances'));
 				var x = 0; //parseFloat($('#dashboard-totalBal').text());
 				var lPD = '0001-01-01';
@@ -883,10 +885,10 @@
 						"source":"Web",
 						"firstName":$('#pmt-fN').val(),
 						"lastName":$('#pmt-lN').val(),
-						"payerId": JSON.parse(sessionStorage.getItem('loanData'))[0].borrowers[0].borrowerId,
-						"payerType":JSON.parse(sessionStorage.getItem('loanData'))[0].borrowers[0].borrowerType.charAt(0).toUpperCase() 
-									+ JSON.parse(sessionStorage.getItem('loanData'))[0].borrowers[0].borrowerType.substring(1),
-						"loanId":JSON.parse(sessionStorage.getItem('loanData'))[0].loanId,
+						"payerId": JSON.parse(sessionStorage.getItem('loanData'))[currentLoanIndex].borrowers[0].borrowerId,
+						"payerType":JSON.parse(sessionStorage.getItem('loanData'))[currentLoanIndex].borrowers[0].borrowerType.charAt(0).toUpperCase() 
+									+ JSON.parse(sessionStorage.getItem('loanData'))[currentLoanIndex].borrowers[0].borrowerType.substring(1),
+						"loanId":JSON.parse(sessionStorage.getItem('loanData'))[currentLoanIndex].loanId,
 						"amount": parseFloat($('#pmt-Amt').val()),
 						"effectiveDate": $('#pmt-Date').val()
 					}),
@@ -907,7 +909,7 @@
 					sessionStorage.removeItem('lenders');
 					sessionStorage.removeItem('loanBalances');
 					sessionStorage.removeItem('paymentDues');
-					setTimeout(function() { GetLoanData(); }, 3000);
+					GetLoanData(); 
 				}).fail(function(jqXHR, exception){
 					// err = true;
 					var msg = '';
