@@ -58,6 +58,7 @@
 			var err = false;
 			var authorized = false;
 			var paymentMade = false;
+			var screenLoaded = false;
 			function Validate() {
 				if (document.getElementById('Username').value == '' || document.getElementById('Username').value == undefined) {
 					$('.error').text('Username is empty');
@@ -82,6 +83,8 @@
 				$.ajax(settings).done(function (response) {
 					err = false;
 					authorized = true;
+					screenLoaded = false;
+					$("#currentLoan").html('');
 					$('.error').text('');
 					console.log(response);
 					sessionStorage.setItem("token", "Bearer " + response.data.accessToken);
@@ -485,7 +488,9 @@
 				}
 
 				setTimeout(function() { LoadLoanDropDown(); }, 1000);
-				setTimeout(function() { LoadDataToScreen(0); }, 2000);
+				if (!screenLoaded) {
+					setTimeout(function() { LoadDataToScreen(0); }, 2000);
+				}
 			});
 
 			function LoadLoanDropDown() {
@@ -559,12 +564,8 @@
 
                 // payment history loop
                 y = JSON.parse(sessionStorage.getItem('paymentHistory'))[currLoan];
-				var pH = "<thead><tr>" +
-				    "<th>Type</th><th >Date</th><th >Amount</th>" +
-				    "<th >Principal Paid</th><th  >Interest Paid</th>" +
-				    "<th >Fees Paid</th>" +
-				    "</tr></thead><tbody>";
-				    
+				var pH = "";
+				
 				y.forEach(function (transaction) {
 				    pH += "<tr><td>" + transaction.transactionType + "</td>" +
 				          "<td >" + ConvertDate(transaction.transactionDate) + "</td>" +
@@ -573,11 +574,15 @@
 				          "<td >" + ConvertToCurrency(transaction.interestPaid) + "</td>" + 
 				          "<td >" + ConvertToCurrency(transaction.feePaid) + "</td></tr>"
 				});
-				pH += "</tbody>";
-				
-				$('#paymentHistory').html(pH);
+				$('table#paymentHistory tbody').html('');
+				$('table#paymentHistory tbody').append(pH);
+					
+					//.table('refresh')
+					//.trigger('create');
 				// loans loop
-
+				// $('#payHistory').bind('pageinit', function() {
+  				// 	$('#paymentHistory').table('refresh').trigger('create');
+				// });
 				y = JSON.parse(sessionStorage.getItem('loanData'))[currLoan];
 				$('#lD-loanStatus').text(y.status);
 				$('#lD-fDD').text(ConvertDate(y.disbursementDate));
@@ -628,6 +633,7 @@
 				$('.calc-field').css('display', 'block');
 				$('.loading').css('display', 'none');
 				$('.error').text('');
+				screenLoaded = true;
 				// place code to be executed on completion of last outstanding ajax call here
 			};
 
@@ -667,7 +673,7 @@
 			<!-- <a class="ui-btn maxw-200" href="#menu">Dashboard</a> -->
 			<a class="ui-btn maxw-200" href="#payment">Make a Payment</a>
 			<a class="ui-btn maxw-200" href="#loanDetails">Loan Details</a>
-			<a class="ui-btn maxw-200" href="#payHistory">Payment History</a>
+			<a class="ui-btn maxw-200" href="#payHistory" onclick="$('#paymentHistory').table('refresh').trigger('create');">Payment History</a>
 			<a class="ui-btn maxw-200" href="#upload">Uploads</a>
 			<a href="#login" onclick="Logoff()" class="ui-btn maxw-200 ui-icon-arrow-l ui-btn-icon-left"
 				data-direction="reverse">Logoff</a>
@@ -767,7 +773,7 @@
 			<a class="ui-btn maxw-200" href="#menu">Dashboard</a>
 			<!-- <a class="ui-btn maxw-200" href="#payment">Make a Payment</a> -->
 			<a class="ui-btn maxw-200" href="#loanDetails">Loan Details</a>
-			<a class="ui-btn maxw-200" href="#payHistory">Payment History</a>
+			<a class="ui-btn maxw-200" href="#payHistory" onclick="$('#paymentHistory').table('refresh').trigger('create');">Payment History</a>
 			<a class="ui-btn maxw-200" href="#upload">Uploads</a>
 			<a href="#login" onclick="Logoff()" class="ui-btn maxw-200 ui-icon-arrow-l ui-btn-icon-left"
 				data-direction="reverse">Logoff</a>
@@ -949,7 +955,7 @@
 		<a class="ui-btn maxw-200" href="#menu">Dashboard</a>
 		<a class="ui-btn maxw-200" href="#payment">Make a Payment</a>
 		<!-- <a class="ui-btn maxw-200" href="#loanDetails">Loan Details</a> -->
-		<a class="ui-btn maxw-200" href="#payHistory">Payment History</a>
+		<a class="ui-btn maxw-200" href="#payHistory" onclick="$('#paymentHistory').table('refresh').trigger('create');">Payment History</a>
 		<a class="ui-btn maxw-200" href="#upload">Uploads</a>
 		<a href="#login" onclick="Logoff()" class="ui-btn maxw-200 ui-icon-arrow-l ui-btn-icon-left"
 			data-direction="reverse">Logoff</a>
@@ -1110,7 +1116,14 @@
 		</div><!-- /content -->
 		<div role="main" class="ui-content">
 			<h4 class="pb-2 loanHeader"></h4>
-			<table class="table table-striped" id="paymentHistory"></table>
+			<table class="ui-body-d ui-shadow table-stripe ui-responsive" data-role="table" data-mode="columntoggle" style="font-size:0.7em" id="paymentHistory">
+				<thead><tr>
+				    <th>Type</th><th >Date</th><th >Amount</th>
+				    <th data-priority='2'>Principal Paid</th><th  data-priority='3'>Interest Paid</th>
+				    <th data-priority='4'>Fees Paid</th>
+					</tr></thead>
+				<tbody></tbody>
+			</table>
 
 
 		</div><!-- /content -->
@@ -1133,13 +1146,33 @@
 			<a class="ui-btn maxw-200" href="#menu">Dashboard</a>
 			<a class="ui-btn maxw-200" href="#payment">Make a Payment</a>
 			<a class="ui-btn maxw-200" href="#loanDetails">Loan Details</a>
-			<a class="ui-btn maxw-200" href="#payHistory">Payment History</a>
+			<a class="ui-btn maxw-200" href="#payHistory" onclick="$('#paymentHistory').table('refresh').trigger('create');">Payment History</a>
 			<!-- <a class="ui-btn maxw-200" href="#upload">Uploads</a> -->
 			<a href="#login" onclick="Logoff()" class="ui-btn maxw-200 ui-icon-arrow-l ui-btn-icon-left"
 				data-direction="reverse">Logoff</a>
 		</div><!-- /content -->
 		<div role="main" class="ui-content">
 			<!-- <h2 class="pb-2" class="loanHeader"></h2> -->
+			<table data-role="table" data-mode="columntoggle" style="font-size:0.7em" class="ui-responsive table table-striped" id="my-table" data-mode="reflow">
+				<thead>
+				  <tr>
+					<th>Rank</th>
+					<th>Movie Title</th>
+					<th data-priority="2">Year</th>
+					<th data-priority="3"><abbr title="Rotten Tomato Rating">Rating</abbr></th>
+					<th data-priority="4">Reviews</th>
+				  </tr>
+				</thead>
+				<tbody>
+				  <tr>
+					<th>1</th>
+					<td><a href="foo.com" data-rel="external">Citizen Kane</a></td>
+					<td>1941</td>
+					<td>100%</td>
+					<td>74</td>
+				  </tr>
+				  </tbody>
+			  </table>
 		</div><!-- /content -->
 
 		<div data-role="footer" data-position="fixed">
