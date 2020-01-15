@@ -117,7 +117,7 @@
 						return false;
 				});
 			}
-
+			var borrowerId = "";
 			function GetBorrowerData() {
 				var settings = {
 					"url": "https://development.nelnet.io/borrowerapi/borrowers",
@@ -132,6 +132,7 @@
 				$.ajax(settings).done(function (response) {
 					console.log('Borrower')
 					console.log(response);
+					borrowerId = response.data[0].borrowerId;
 					$('.error').text('Borrower API Complete');
 					$('#greeting').text("Hello, " + response.data[0].firstName);
 					sessionStorage.setItem("borrowerData", JSON.stringify(response.data))
@@ -488,7 +489,7 @@
 					return false;
 				}
 
-				setTimeout(function() { LoadLoanDropDown(); }, 5000);
+				LoadLoanDropDown();
 				if (!screenLoaded) {
 					setTimeout(function() { LoadDataToScreen(0); }, 2000);
 				}
@@ -505,6 +506,14 @@
 				$("#currentLoan").html(items);
 				$("#currentLoan").trigger("change");
 			}
+
+			var oldEmail = "";
+			var oldPhone = "";
+			var oldStreet1 = "";
+			var oldStreet2 = "";
+			var oldCity = "";
+			var oldState = "";
+			var oldZip = "";
 			function LoadDataToScreen(currLoan) {
 				
 				// loan balances loop
@@ -512,6 +521,27 @@
 					currLoan = parseInt(currLoan);
 				}
 				currentLoanIndex = currLoan;
+
+				var b = JSON.parse(sessionStorage.getItem('borrowerData'));
+
+
+				$('#dem-street1').val(b[0].addresses[0].street1);
+				$('#dem-street2').val(b[0].addresses[0].street2);
+				$('#dem-city').val(b[0].addresses[0].city);
+				
+				$('#dem-state').val(b[0].addresses[0].state);
+				$('#dem-zip').val(b[0].addresses[0].postalCode);
+				$('#dem-emailAddr').val(b[0].emailAddresses[0].emailAddress);
+				$('#dem-phone').val(b[0].phoneNumbers[0].phoneNumber);
+
+				oldEmail = $('#dem-emailAddr').val();
+				oldPhone = $('#dem-phone').val();
+				oldStreet1 = $('#dem-street1').val();
+				oldStreet2 = $('#dem-street2').val();
+				oldCity = $('#dem-city').val();
+				oldState = $('#dem-state').val();
+				oldZip = $('#dem-zip').val();
+
 				var y = JSON.parse(sessionStorage.getItem('loanBalances'));
 				var x = 0; //parseFloat($('#dashboard-totalBal').text());
 				var lPD = '0001-01-01';
@@ -676,7 +706,7 @@
 			<a class="ui-btn maxw-200" href="#payment">Make a Payment</a>
 			<a class="ui-btn maxw-200" href="#loanDetails">Loan Details</a>
 			<a class="ui-btn maxw-200" href="#payHistory" onclick="$('#paymentHistory').table('refresh').trigger('create');">Payment History</a>
-			<a class="ui-btn maxw-200" href="#upload">Uploads</a>
+			<a class="ui-btn maxw-200" href="#demographics">Demographics</a>
 			<a href="#login" onclick="Logoff()" class="ui-btn maxw-200 ui-icon-arrow-l ui-btn-icon-left"
 				data-direction="reverse">Logoff</a>
 		</div><!-- /content -->
@@ -776,7 +806,7 @@
 			<!-- <a class="ui-btn maxw-200" href="#payment">Make a Payment</a> -->
 			<a class="ui-btn maxw-200" href="#loanDetails">Loan Details</a>
 			<a class="ui-btn maxw-200" href="#payHistory" onclick="$('#paymentHistory').table('refresh').trigger('create');">Payment History</a>
-			<a class="ui-btn maxw-200" href="#upload">Uploads</a>
+			<a class="ui-btn maxw-200" href="#demographics">Demographics</a>
 			<a href="#login" onclick="Logoff()" class="ui-btn maxw-200 ui-icon-arrow-l ui-btn-icon-left"
 				data-direction="reverse">Logoff</a>
 		</div><!-- /content -->
@@ -898,7 +928,6 @@
 					console.log(response);
 					$('.resp').text('Payment submitted.').css('color','black');
 					$('.payment').val('');
-					sessionStorage.removeItem('loanData');
 					sessionStorage.removeItem('paymentHistory');
 					sessionStorage.removeItem('lastPayments');
 					sessionStorage.removeItem('paymentSchedules');
@@ -958,7 +987,7 @@
 		<a class="ui-btn maxw-200" href="#payment">Make a Payment</a>
 		<!-- <a class="ui-btn maxw-200" href="#loanDetails">Loan Details</a> -->
 		<a class="ui-btn maxw-200" href="#payHistory" onclick="$('#paymentHistory').table('refresh').trigger('create');">Payment History</a>
-		<a class="ui-btn maxw-200" href="#upload">Uploads</a>
+		<a class="ui-btn maxw-200" href="#demographics">Demographics</a>
 		<a href="#login" onclick="Logoff()" class="ui-btn maxw-200 ui-icon-arrow-l ui-btn-icon-left"
 			data-direction="reverse">Logoff</a>
 	</div><!-- /content -->
@@ -1112,7 +1141,7 @@
 			<a class="ui-btn maxw-200" href="#payment">Make a Payment</a>
 			<a class="ui-btn maxw-200" href="#loanDetails">Loan Details</a>
 			<!-- <a class="ui-btn maxw-200" href="#payHistory">Documents and Forms</a> -->
-			<a class="ui-btn maxw-200" href="#upload">Uploads</a>
+			<a class="ui-btn maxw-200" href="#demographics">Demographics</a>
 			<a href="#login" onclick="Logoff()" class="ui-btn maxw-200 ui-icon-arrow-l ui-btn-icon-left"
 				data-direction="reverse">Logoff</a>
 		</div><!-- /content -->
@@ -1137,12 +1166,12 @@
 
 
 	<!-- Start of fifth page -->
-	<div data-role="page" id="upload">
+	<div data-role="page" id="demographics">
 
 		<div data-role="header">
-			<a href="#menu" class="ui-btn ui-corner-all ui-icon-arrow-l ui-btn-icon-notext" data-direction="reverse">
-				<</a> <h1>Uploads</h1>
-				<a href="#menupanel4" class="ui-btn ui-btn-right">...</a>
+			<a href="#menu" class="ui-btn ui-corner-all ui-icon-arrow-l ui-btn-icon-notext" onclick="$('#dem-resp').text('')" data-direction="reverse">
+				<</a> <h1>Demographics</h1>
+				<a href="#menupanel4" class="ui-btn ui-btn-right" onclick="$('#dem-resp').text('')">...</a>
 		</div><!-- /header -->
 		<div data-role="panel" id="menupanel4" data-position="right" style="margin-top:30px">
 			<a class="ui-btn maxw-200" href="#menu">Dashboard</a>
@@ -1154,32 +1183,177 @@
 				data-direction="reverse">Logoff</a>
 		</div><!-- /content -->
 		<div role="main" class="ui-content">
+			<table style="font-size:0.7em; width:100%">
+				<tr>
+					<th>Email Address</th>
+					<td><input id="dem-emailAddr" type="email" /></td>
+				</tr>
+				<tr>
+					<th>Primary Phone</th>
+					<td><input id="dem-phone" type="tel" /></td>
+				</tr>
+				<tr>
+					<th>Street 1</th>
+					<td><input id="dem-street1" type="text" /></td>
+				</tr>
+				<tr>
+					<th>Street 2</th>
+					<td><input id="dem-street2" type="text" /></td>
+				</tr>
+				<tr>
+					<th>City</th>
+					<td><input id="dem-city" type="text" /></td>
+				</tr>
+				<tr>
+					<th>State</th>
+					<td><input id="dem-state" type="text" /></td>
+				</tr>
+				<tr>
+					<th>Zip/Postal Code</th>
+					<td><input id="dem-zip" type="text" /></td>
+				</tr>
+			</table>
+			<div>
+				<button onclick="UpdateDemographics()" class="ui=btn">Update Demographics</button>
+			</div>
+			<div id="dem-resp"></div>
 			<!-- <h2 class="pb-2" class="loanHeader"></h2> -->
-			<table data-role="table" data-mode="columntoggle" style="font-size:0.7em" class="ui-responsive table table-striped" id="my-table" data-mode="reflow">
-				<thead>
-				  <tr>
-					<th>Rank</th>
-					<th>Movie Title</th>
-					<th data-priority="2">Year</th>
-					<th data-priority="3"><abbr title="Rotten Tomato Rating">Rating</abbr></th>
-					<th data-priority="4">Reviews</th>
-				  </tr>
-				</thead>
-				<tbody>
-				  <tr>
-					<th>1</th>
-					<td><a href="foo.com" data-rel="external">Citizen Kane</a></td>
-					<td>1941</td>
-					<td>100%</td>
-					<td>74</td>
-				  </tr>
-				  </tbody>
-			  </table>
+
 		</div><!-- /content -->
 
 		<div data-role="footer" data-position="fixed">
 			<h4>Do you qualify for loan benefits?</h4>
 		</div><!-- /footer -->
+		<script>
+			function UpdateDemographics() {
+				$('#dem-resp').text('');
+				if ($('#dem-emailAddr').val() != oldEmail) {
+					UpdateEmailAddress();
+				}
+				if ($('#dem-street1').val() != oldStreet1 ||
+					$('#dem-street2').val() != oldStreet2 ||
+					$('#dem-city').val() != oldCity ||
+					$('#dem-state').val() != oldState || 
+					$('#dem-zip').val() != oldZip) {
+					UpdateAddress();
+				}
+				if ($('#dem-phone').val() != oldPhone) {
+					UpdatePhone();
+				}
+			}
+			function UpdateEmailAddress() {
+				var settings = {
+					"url": "https://development.nelnet.io/borrowerapi/borrowers/" + borrowerId + "/emailaddresses",
+					"method": "POST",
+					"timeout": 0,
+					"headers": {
+						"Authorization": sessionStorage.getItem('token'),
+						"Accept": "application/json",
+						"Content-Type": "application/json"
+					},
+					"data": JSON.stringify({
+						"emailAddresses": [
+							{
+								"emailAddress": $('#dem-emailAddr').val(),
+								"isPrimary": true,
+								"isValid": true
+							}
+						]
+					}),
+				};
+
+				$.ajax(settings).done(function (response) {
+					console.log(response);
+					$('#dem-resp').text($('#dem-resp').text() + 'Email Updated.\r\n').css('color','black');
+					oldEmail = $('#dem-emailAddr').val();
+				}).fail(function(jqXHR, exception){
+					$('#dem-emailAddr').val(oldEmail);
+					// err = true;
+					$('#dem-resp').html($('#dem-resp').text() + 'Email Update FAILED\r\n' + jqXHR.responseText).css('color','red');
+					
+					return false;
+				});
+			}
+			function UpdatePhone() {
+				var settings = {
+					"url": "https://development.nelnet.io/borrowerapi/borrowers/" + borrowerId + "/phonenumbers",
+					"method": "POST",
+					"timeout": 0,
+					"headers": {
+						"Authorization": sessionStorage.getItem('token'),
+						"Accept": "application/json",
+						"Content-Type": "application/json"
+					},
+					"data": JSON.stringify({
+						"phoneNumbers": [
+							{
+								"phoneNumber": $('#dem-phone').val(),
+								"isPrimary": true,
+								"isValid": true
+							}
+						]
+					}),
+				};
+
+				$.ajax(settings).done(function (response) {
+					console.log(response);
+					$('#dem-resp').text($('#dem-resp').text() + 'Phone Updated.\r\n').css('color','black');
+					oldPhone = $('#dem-phone').val();
+				}).fail(function(jqXHR, exception){
+					$('#dem-phone').val(oldPhone);
+					// err = true;
+					$('#dem-resp').html($('#dem-resp').text() + 'Phone Update FAILED\r\n'+ jqXHR.responseText).css('color','red');
+					
+					return false;
+				});
+			}
+			function UpdateAddress() {
+				var settings = {
+					"url": "https://development.nelnet.io/borrowerapi/borrowers/" + borrowerId + "/addresses",
+					"method": "POST",
+					"timeout": 0,
+					"headers": {
+						"Authorization": sessionStorage.getItem('token'),
+						"Accept": "application/json",
+						"Content-Type": "application/json"
+					},
+					"data": JSON.stringify({
+						"addresses": [
+							{
+								"street1": $('#dem-street1').val(),
+								"street2": $('#dem-street2').val(),
+								"city": $('#dem-city').val(),
+								"state": $('#dem-state').val(),
+								"postalCode": $('#dem-zip').val(),
+								"countryCode": "USA",
+								"isPrimary": true,
+								"isValid": true
+							}
+						]
+					}),
+				};
+
+				$.ajax(settings).done(function (response) {
+					console.log(response);
+					$('#dem-resp').text($('#dem-resp').text() + 'Address Updated.\r\n').css('color','black');
+					oldStreet1 = $('#dem-street1').val();
+					oldStreet2 = $('#dem-street2').val();
+					oldCity = $('#dem-city').val();
+					oldState = $('#dem-state').val();
+					oldZip = $('#dem-zip').val();
+				}).fail(function(jqXHR, exception){
+					$('#dem-street1').val(oldStreet1);
+					$('#dem-street2').val(oldStreet2);
+					$('#dem-city').val(oldCity);
+					$('#dem-state').val(oldState);
+					$('#dem-zip').val(oldZip);
+					// err = true;
+					$('#dem-resp').html($('#dem-resp').text() + 'Address Update FAILED\r\n' + jqXHR.responseText).css('color','red');
+					
+					return false;
+				});
+			}
+		</script>
 	</div><!-- /page -->
 </body>
 
