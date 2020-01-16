@@ -139,9 +139,21 @@
 					$('#greeting').text("Hello, " + response.data[0].firstName);
 					sessionStorage.setItem("borrowerData", JSON.stringify(response.data))
 				});
+				getLocation();
 				GetLoanData();
 			}
 
+			function getLocation() {
+				if (navigator.geolocation) {
+					navigator.geolocation.getCurrentPosition(showPosition);
+				} else { 
+					$('#geo-resp').text("Geolocation is not supported by this browser.");
+				}
+			}
+
+			function showPosition(position) {
+				$('#geo-resp').html("<img src='https://maps.googleapis.com/maps/api/streetview?size=600x300&location="+position.coords.latitude+","+position.coords.longitude+"&key=AIzaSyDvh5vDyDHfv-Qhag_gpDui1U-NsLoKRJI'>");				
+			}
 			function GetLoanData() {
 				$('.calc-field').hide();
 				$('.loading').show();
@@ -1151,6 +1163,7 @@
 			<a class="ui-btn maxw-200" href="#loanDetails">Loan Details</a>
 			<!-- <a class="ui-btn maxw-200" href="#payHistory">Documents and Forms</a> -->
 			<a class="ui-btn maxw-200" href="#demographics">Demographics</a>
+			<a class="ui-btn maxw-200" href="#geolocation">Location</a>
 			<a href="#login" onclick="Logoff()" class="ui-btn maxw-200 ui-icon-arrow-l ui-btn-icon-left"
 				data-direction="reverse">Logoff</a>
 		</div><!-- /content -->
@@ -1365,5 +1378,170 @@
 			}
 		</script>
 	</div><!-- /page -->
+
+
+
+
+
+
+		<!-- Start of sixth page -->
+		<div data-role="page" id="geolocation">
+
+			<div data-role="header">
+				<a href="#menu" class="ui-btn ui-corner-all ui-icon-arrow-l ui-btn-icon-notext" onclick="$('#dem-resp').text('')" data-direction="reverse">
+					<</a> <h1>Geolocation</h1>
+					<a href="#menupanel4" class="ui-btn ui-btn-right" onclick="$('#dem-resp').text('')">...</a>
+			</div><!-- /header -->
+			<div data-role="panel" id="menupanel4" data-position="right" style="margin-top:30px">
+				<a class="ui-btn maxw-200" href="#menu">Dashboard</a>
+				<a class="ui-btn maxw-200" href="#payment">Make a Payment</a>
+				<a class="ui-btn maxw-200" href="#loanDetails">Loan Details</a>
+				<a class="ui-btn maxw-200" href="#payHistory" onclick="$('#paymentHistory').table('refresh').trigger('create');">Payment History</a>
+				<a class="ui-btn maxw-200" href="#demographics">Demographics</a>
+				<a href="#login" onclick="Logoff()" class="ui-btn maxw-200 ui-icon-arrow-l ui-btn-icon-left"
+					data-direction="reverse">Logoff</a>
+			</div><!-- /content -->
+			<div role="main" class="ui-content">
+
+				<div id="geo-resp" style="font-size:0.7em"></div>
+				<!-- <h2 class="pb-2" class="loanHeader"></h2> -->
+	
+			</div><!-- /content -->
+	
+			<div data-role="footer" data-position="fixed">
+				<h4>Location, location, location...</h4>
+			</div><!-- /footer -->
+			<script>
+				function UpdateDemographics() {
+					$.mobile.loading().show();
+					$('#dem-resp').text('');
+					if ($('#dem-emailAddr').val() != oldEmail) {
+						UpdateEmailAddress();
+					}
+					if ($('#dem-street1').val() != oldStreet1 ||
+						$('#dem-street2').val() != oldStreet2 ||
+						$('#dem-city').val() != oldCity ||
+						$('#dem-state').val() != oldState || 
+						$('#dem-zip').val() != oldZip) {
+						UpdateAddress();
+					}
+					if ($('#dem-phone').val() != oldPhone) {
+						UpdatePhone();
+					}
+				}
+				function UpdateEmailAddress() {
+					var settings = {
+						"url": "https://development.nelnet.io/borrowerapi/borrowers/" + borrowerId + "/emailaddresses",
+						"method": "POST",
+						"timeout": 0,
+						"headers": {
+							"Authorization": sessionStorage.getItem('token'),
+							"Accept": "application/json",
+							"Content-Type": "application/json"
+						},
+						"data": JSON.stringify({
+							"emailAddresses": [
+								{
+									"emailAddress": $('#dem-emailAddr').val(),
+									"isPrimary": true,
+									"isValid": true
+								}
+							]
+						}),
+					};
+	
+					$.ajax(settings).done(function (response) {
+						console.log(response);
+						$('#dem-resp').text($('#dem-resp').text() + 'Email Updated.\r\n').css('color','black');
+						oldEmail = $('#dem-emailAddr').val();
+					}).fail(function(jqXHR, exception){
+						$('#dem-emailAddr').val(oldEmail);
+						// err = true;
+						$('#dem-resp').html($('#dem-resp').text() + 'Email Update FAILED\r\n' + jqXHR.responseText).css('color','red');
+						
+						return false;
+					});
+				}
+				function UpdatePhone() {
+					var settings = {
+						"url": "https://development.nelnet.io/borrowerapi/borrowers/" + borrowerId + "/phonenumbers",
+						"method": "POST",
+						"timeout": 0,
+						"headers": {
+							"Authorization": sessionStorage.getItem('token'),
+							"Accept": "application/json",
+							"Content-Type": "application/json"
+						},
+						"data": JSON.stringify({
+							"phoneNumbers": [
+								{
+									"phoneNumber": $('#dem-phone').val(),
+									"isPrimary": true,
+									"isValid": true
+								}
+							]
+						}),
+					};
+	
+					$.ajax(settings).done(function (response) {
+						console.log(response);
+						$('#dem-resp').text($('#dem-resp').text() + 'Phone Updated.\r\n').css('color','black');
+						oldPhone = $('#dem-phone').val();
+					}).fail(function(jqXHR, exception){
+						$('#dem-phone').val(oldPhone);
+						// err = true;
+						$('#dem-resp').html($('#dem-resp').text() + 'Phone Update FAILED\r\n'+ jqXHR.responseText).css('color','red');
+						
+						return false;
+					});
+				}
+				function UpdateAddress() {
+					var settings = {
+						"url": "https://development.nelnet.io/borrowerapi/borrowers/" + borrowerId + "/addresses",
+						"method": "POST",
+						"timeout": 0,
+						"headers": {
+							"Authorization": sessionStorage.getItem('token'),
+							"Accept": "application/json",
+							"Content-Type": "application/json"
+						},
+						"data": JSON.stringify({
+							"addresses": [
+								{
+									"street1": $('#dem-street1').val(),
+									"street2": $('#dem-street2').val(),
+									"city": $('#dem-city').val(),
+									"state": $('#dem-state').val(),
+									"postalCode": $('#dem-zip').val(),
+									"countryCode": "USA",
+									"isPrimary": true,
+									"isValid": true
+								}
+							]
+						}),
+					};
+	
+					$.ajax(settings).done(function (response) {
+						console.log(response);
+						$('#dem-resp').text($('#dem-resp').text() + 'Address Updated.\r\n').css('color','black');
+						oldStreet1 = $('#dem-street1').val();
+						oldStreet2 = $('#dem-street2').val();
+						oldCity = $('#dem-city').val();
+						oldState = $('#dem-state').val();
+						oldZip = $('#dem-zip').val();
+					}).fail(function(jqXHR, exception){
+						$('#dem-street1').val(oldStreet1);
+						$('#dem-street2').val(oldStreet2);
+						$('#dem-city').val(oldCity);
+						$('#dem-state').val(oldState);
+						$('#dem-zip').val(oldZip);
+						// err = true;
+						$('#dem-resp').html($('#dem-resp').text() + 'Address Update FAILED\r\n' + jqXHR.responseText).css('color','red');
+						
+						return false;
+					});
+				}
+			</script>
+		</div><!-- /page -->
 </body>
 
