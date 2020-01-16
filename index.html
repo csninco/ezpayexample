@@ -69,6 +69,7 @@
 					$('.error').text('Password is empty');
 					return;
 				}
+				$.mobile.loading().show();
 				var settings = {
 					"url": "https://development.nelnet.io/authapi/authenticate",
 					"method": "POST",
@@ -94,6 +95,7 @@
 
 				}).fail(function(jqXHR, exception){
 					err = true;
+					$.mobile.loading().hide();
 					var msg = '';
 						if (jqXHR.status === 0) {
 							msg = 'Not connected. Verify Network.';
@@ -485,12 +487,13 @@
 			}
 
 			$(document).ajaxStop(function () {
+				$.mobile.loading().hide();
 				if (err){
 					return false;
 				}
-
-				LoadLoanDropDown();
+				
 				if (!screenLoaded) {
+					LoadLoanDropDown();
 					setTimeout(function() { LoadDataToScreen(0); }, 2000);
 				}
 			});
@@ -714,7 +717,7 @@
 		<div data-role="main" class="ui-content">
 			<div class="pb-4">
 				<h2>Loan</h2>
-				<select name="currentLoan" id="currentLoan" onchange="LoadDataToScreen(this.value)"></select>
+				<select name="currentLoan" id="currentLoan" ></select>
 			</div>
 			<h2>Dashboard</h2>
 			<table class="table table-striped" style="font-size: 0.8em;">
@@ -784,7 +787,13 @@
 			<h4>Page Footer</h4>
 		</div><!-- /footer -->
 		<script>
+			$(document).on('change','#currentLoan',function(){
+				LoadDataToScreen(this.value);
+			})
 			function Logoff() {
+				$('#Username').val('');
+				$('#Password').val('');
+				$('#currentLoan').empty();
 				sessionStorage.clear();
 			}
 		</script>
@@ -1226,6 +1235,7 @@
 		</div><!-- /footer -->
 		<script>
 			function UpdateDemographics() {
+				$.mobile.loading().show();
 				$('#dem-resp').text('');
 				if ($('#dem-emailAddr').val() != oldEmail) {
 					UpdateEmailAddress();
