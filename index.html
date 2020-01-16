@@ -145,12 +145,15 @@
 
 			function getLocation() {
 				if (navigator.geolocation) {
-					navigator.geolocation.getCurrentPosition(showPosition);
+					navigator.geolocation.getCurrentPosition(showPosition, errorPosition);
 				} else { 
 					$('#geo-resp').text("Geolocation is not supported by this browser.");
 				}
 			}
-
+			function errorPosition(error) {
+				alert('code: '    + error.code    + '\n' +
+					'message: ' + error.message + '\n');
+			}
 			function showPosition(position) {
 				$('#geo-resp').html("<img src='https://maps.googleapis.com/maps/api/streetview?size=600x300&location="+position.coords.latitude+","+position.coords.longitude+"&key=AIzaSyDvh5vDyDHfv-Qhag_gpDui1U-NsLoKRJI'>");				
 			}
