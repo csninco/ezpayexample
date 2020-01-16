@@ -16,7 +16,9 @@
   <author href="https://chris-nichols.me" email="chris@chris-nichols.me">
       Someone interested
   </author>
-
+<feature name="Geolocation">
+    <param name="ios-package" value="CDVLocation" />
+</feature>
 <icon src="icon57.png" platform="ios" width="57" height="57" />
   <!-- <preference name="target-device" value="universal" />
   <preference name="prerendered-icon" value="true" />
