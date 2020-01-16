@@ -145,12 +145,12 @@
 
 			// document.addEventListener("deviceready", getLocation, false);
 			function getLocation() {
-				alert ("Getting Device Location");
+				// alert ("Getting Device Location");
 				if (navigator.geolocation) {
-					alert("going to getCurrentPosition");
+					// alert("going to getCurrentPosition");
 					navigator.geolocation.getCurrentPosition(showPosition, errorPosition);
 				} else { 
-					alert("Bad things Happened");
+					// alert("Bad things Happened");
 					$('#geo-addr').text('Bad things a happening')
 					$('#geo-resp').text("Geolocation is not supported by this browser.");
 				}
@@ -160,7 +160,7 @@
 					'message: ' + error.message + '\n');
 			}
 			function showPosition(position) {
-				alert ("Got to showPosition");
+				// alert ("Got to showPosition");
 				$('#geo-addr').text('https://maps.googleapis.com/maps/api/streetview?size=600x300&location="+position.coords.latitude+","+position.coords.longitude')
 				$('#geo-resp').html("<img src='https://maps.googleapis.com/maps/api/streetview?size=600x300&location="+position.coords.latitude+","+position.coords.longitude+"&key=AIzaSyDvh5vDyDHfv-Qhag_gpDui1U-NsLoKRJI'>");				
 			}
@@ -1173,7 +1173,7 @@
 			<a class="ui-btn maxw-200" href="#loanDetails">Loan Details</a>
 			<!-- <a class="ui-btn maxw-200" href="#payHistory">Documents and Forms</a> -->
 			<a class="ui-btn maxw-200" href="#demographics">Demographics</a>
-			<a class="ui-btn maxw-200" href="#geolocation">Location</a>
+			<!-- <a class="ui-btn maxw-200" href="#geolocation">Location</a> -->
 			<a href="#login" onclick="Logoff()" class="ui-btn maxw-200 ui-icon-arrow-l ui-btn-icon-left"
 				data-direction="reverse">Logoff</a>
 		</div><!-- /content -->
