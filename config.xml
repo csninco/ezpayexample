@@ -18,7 +18,7 @@
   </author>
 
   <engine name="ios" spec="latest" />
-  <splash src="res/screen/ios/splash@2x~universal~anyany.png" />
+  <!-- <splash src="res/screen/ios/splash@2x~universal~anyany.png" /> -->
 
 <!-- <feature name="Geolocation">
     <param name="ios-package" value="CDVLocation" />
