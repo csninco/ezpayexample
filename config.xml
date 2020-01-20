@@ -16,6 +16,10 @@
   <author href="https://chris-nichols.me" email="chris@chris-nichols.me">
       Someone interested
   </author>
+
+  <engine name="ios" spec="latest" />
+  <splash src="res/screen/ios/splash@2x~universal~anyany.png" />
+
 <!-- <feature name="Geolocation">
     <param name="ios-package" value="CDVLocation" />
 </feature> -->
