@@ -32,8 +32,8 @@
   <string>need location access to find things nearby</string>
 </edit-config> 
 <icon src="icon57.png" platform="ios" width="57" height="57" />
-<splash src="res/screen/ios/splash@2x~universal~anyany.png" />
-<preference name="SplashScreenDelay" value="10000" />
+<!-- <splash src="res/screen/ios/splash@2x~universal~anyany.png" />
+<preference name="SplashScreenDelay" value="10000" /> -->
   <!-- <preference name="target-device" value="universal" />
   <preference name="prerendered-icon" value="true" />
   <preference name="detect-data-types" value="false" />
