@@ -56,7 +56,6 @@
 		</div><!-- /footer -->
 		<script>
 			var err = false;
-			var authorized = false;
 			var paymentMade = false;
 			var screenLoaded = false;
 			var currentLoanIndex = 0;
@@ -84,7 +83,7 @@
 
 				$.ajax(settings).done(function (response) {
 					err = false;
-					authorized = true;
+					sessionStorage.setItem('authorized', 'true');
 					screenLoaded = false;
 					$("#currentLoan").html('');
 					$('.error').text('');
@@ -708,7 +707,7 @@
 
 			$(document).ready(function(){
 				//var currLoan = $('#currentLoan').children("option:selected").val();
-				if (authorized) {
+				if (sessionStorage.getItem('authorized') == 'true') {
 					LoadLoanDropDown();
 					LoadDataToScreen(0);
 				}
@@ -959,6 +958,7 @@
 					console.log(response);
 					$('.resp').text('Payment submitted.').css('color','black');
 					$('.payment').val('');
+					screenLoaded = false;
 					sessionStorage.removeItem('paymentHistory');
 					sessionStorage.removeItem('lastPayments');
 					sessionStorage.removeItem('paymentSchedules');
